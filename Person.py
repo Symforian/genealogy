@@ -1,18 +1,18 @@
-class Person:
+from Entry import Entry as ent
 
-    def generateIdn():
-        return 0
+
+class Person(ent):
 
     # idn None = not yet assigned, other None = unknown
 
     def __init__(self, idn=None, name=None, sname=None, birt=None, deat=None):
-        if idn is None:
-            self.idn = Person.generateIdn()
+        self.idn = idn
         self.name = name
         self.surname = sname
         self.birth = birt
         self.death = deat
         self.origin = None
+        self.family_connections = None
 
     def addOrigin(self, origin):
         self.origin = origin
@@ -30,5 +30,6 @@ class Person:
             self.origin = new_value
 
     def __str__(self):
-        temp = "["+str(self.name)+" "+str(self.surname)+"\n"+str(self.birth)
-        return temp+" "+str(self.death)+"]"
+        temp = "[Person entry:\nName:"+str(self.name)+" "+str(self.surname)
+        temp += "\nOrigin: "+str(self.origin)+"\nBorn:"+str(self.birth)
+        return temp+"\nDied: "+str(self.death)+"]\n"
