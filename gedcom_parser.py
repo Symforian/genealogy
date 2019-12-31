@@ -134,5 +134,5 @@ class GEDCOM_parser:
         return self.get_data()
 
 
-gp = GEDCOM_parser("f")
-print(gp.parse())
+# gp = GEDCOM_parser("f")
+# print(gp.parse())

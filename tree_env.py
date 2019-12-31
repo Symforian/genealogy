@@ -16,6 +16,9 @@ class env:
     def addEntry(self, eid, value):
         self.used_ids[eid] = value
 
+    def entries(self):
+        return self.used_ids
+
     def __str__(self):
         ret = ""
         for (k, v) in self.used_ids.items():
