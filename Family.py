@@ -4,11 +4,11 @@ from Entry import Entry as ent
 class Family(ent):
 
     def __init__(self, idn=None, head=None, part=None, rel=None):
-        self.idn = idn
-        self.head = head
-        self.partner = part
-        self.relation_type = rel
-        self.family_connections = None
+        self.idn = idn  # string(idn)
+        self.head = head  # string (idn)
+        self.partner = part  # string(idn)
+        self.relation_type = rel  # string
+        self.family_connections = None  # list of string(idn)
 
     def getId(self):
         return self.idn

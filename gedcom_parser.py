@@ -23,9 +23,6 @@ class GEDCOM_parser:
         self.data_holder = None
         self.current_tag = None
 
-    def get_data(self):
-        return self.env
-
     def line_to_tuple(line):
         ret = line.split()
         if len(ret) > 0:
@@ -121,7 +118,7 @@ class GEDCOM_parser:
             return 0
 
     def parse(self):
-        with open('km.GED', 'r') as reader:
+        with open(self.file + '.GED', 'r') as reader:
             line = reader.readline()
             while line != '':
                 # print(GEDCOM_parser.parse_line(line), end='')
@@ -131,7 +128,7 @@ class GEDCOM_parser:
             #  with correct data
                 line = reader.readline()
 
-        return self.get_data()
+        return self.env
 
 
 # gp = GEDCOM_parser("f")

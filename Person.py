@@ -4,15 +4,19 @@ from Entry import Entry as ent
 class Person(ent):
 
     # idn None = not yet assigned, other None = unknown
+    u = ['Unknown']
 
-    def __init__(self, idn=None, name=None, sname=None, birt=None, deat=None):
-        self.idn = idn
-        self.name = name
-        self.surname = sname
-        self.birth = birt
-        self.death = deat
-        self.origin = None
-        self.family_connections = None
+    def __init__(self, idn, name=u, sname=u, birt=u, deat=['']):
+        self.depth = 0
+        self.focus = -1
+        self.select = False
+        self.idn = idn  # string(idn)
+        self.name = name  # list of string
+        self.surname = sname  # list of string
+        self.birth = birt  # list of string TODO change to tuple3/ PLACE?
+        self.death = deat  # list of string TODO change to tuple3/ PLACE?
+        self.origin = None  # string(idn_fam)
+        self.family_connections = None  # list of string(idn_fam)
 
     def addOrigin(self, origin):
         self.origin = origin
@@ -41,7 +45,7 @@ class Person(ent):
         ret += date
         if self.death is not None:
             date = ""
-            for i in self.birth:
+            for i in self.death:
                 date += i + " "
             ret += date[:-1]
         return ret

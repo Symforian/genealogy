@@ -1,6 +1,7 @@
 from argparse import ArgumentParser as ap
 from graph import graph_representation as g_r
 from gedcom_parser import GEDCOM_parser as ged_parse
+from gedcom_exporter import GEDCOM_exporter as ged_export
 from Person import Person as per
 from Family import Family as fam
 
@@ -16,9 +17,23 @@ class program:
         parser = ged_parse(input("Enter filename\n"))
         self.env = parser.parse()
 
+    def export_gedcom(self):
+        if self.env is not None:
+            msg = "Enter filename\n"
+            ged_export(input(msg), self.env.entries()).export()
+        else:
+            print("No data to export\n")
+
     def show(self):
-        self.drawer.upload_data(self.env.entries())
+        self.drawer.send_data(self.env.entries())
         self.drawer.show()
+
+    def select(self):
+        self.drawer.send_data(self.env.entries())
+        self.drawer.deselect()
+        select = input("Enter idn:\n")
+        if select != '':
+            self.drawer.select_node(select)
 
     def list_env(self):
         part = input("What do you want to list?\n")
@@ -32,15 +47,28 @@ class program:
         elif part in ('f', 'family', 'families'):
             print(list(filter(lambda t: isinstance(t[1], fam), items)))
 
+    def enter_date():
+        d = input("Enter day:\n")
+        m = input("Enter month:\n")
+        y = input("Enter year:\n")
+        date = [d, m, y]
+        if all(data == '' for data in date):
+            date = per.u
+        return date
+
     def add_entry(self):
         i = input("Enter idn:\n")
-        n = [input("Enter name:\n")]
-        s = [input("Enter surname:\n")]
-        bd = input("Enter birth day:\n")
-        bm = input("Enter birth month:\n")
-        by = input("Enter birth year:\n")
-        b = [bd, bm, by]
-        d = input("Enter death day:\n")
+        n = input("Enter name:\n").split()
+        s = input("Enter surname:\n").split()
+        print("Birth:")
+        b = program.enter_date()
+        d = input("Is alive?[enter = yes]:\n")
+        if d == '':
+            d = ['']
+        else:
+            print("Death:")
+            d = program.enter_date()
+
         new_person = per(idn=i, name=n, sname=s, birt=b, deat=d)
         self.env.entries()[i] = new_person
 
@@ -57,19 +85,34 @@ class program:
         h = input("Enter head id:\n")
         p = input("Enter partner id:\n")
         r = input("Enter relation name:\n")
-        self.env.entries()[idn] = fam(idn, h, p, r)
-        # TODO if one of h p is None, create Unknown <- but only one
-        self.env.entries()[h].add(idn)
-        self.env.entries()[p].add(idn)
+        entries = self.env.entries()
+        h_d = entries[h].depth
+        p_d = entries[p].depth
+        if h_d > p_d:
+            entries[p].depth = h_d
+        elif p_d > h_d:
+            entries[h].depth = p_d
+        entries[idn] = fam(idn, h, p, r)
+        entries[h].add(idn)
+        entries[p].add(idn)
 
     def update_entry(self):
         idn = input("Enter idn:\n")
         data = input("Enter data:\n")
         value = input("Enter value:\n")
-        if data in ('birth', 'death'):
-            value = value.split()
+        if data in ('name', 'surname', 'birth', 'death'):
+            if value == '':
+                value = per.u
+            else:
+                value = value.split()
         elif data == 'origin':
-            self.env.entries()[value].add(idn)
+            origin = self.env.entries()[value]
+            # not safe - need to checn if ^ exists
+            origin.add(idn)
+            n_depth = self.env.entries()[origin.head].depth + 1
+            # also not safe    V  might not exist
+            self.env.entries()[idn].depth = n_depth
+        # need to check if V exists
         self.env.entries()[idn].updateData(data, value)
 
     def quit(self):
@@ -79,8 +122,10 @@ class program:
         print("Unknown command")
     commands = {
                 'i': import_gedcom,
+                'e': export_gedcom,
                 's': show,
                 'l': list_env,
+                'f': select,
                 'a': add_entry,
                 'c': check_entry,
                 'r': remove_entry,
@@ -92,7 +137,6 @@ class program:
 
 def main_cli():
     p = program()
-    DEFINED_GEDFILE = 'km.GED'
     current_command = None
     while(p.running):
         if current_command is None:
