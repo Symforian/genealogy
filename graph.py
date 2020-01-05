@@ -52,6 +52,7 @@ class graph_representation:
         return ids
 
     def find_top(self):
+        self.current_level = set()
         for entry in self.data.values():
             if isinstance(entry, p) and entry.origin is None:
                 part_with_origin = False
@@ -78,7 +79,8 @@ class graph_representation:
             c = graph_representation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
 
-    def get_children(self, el, children):
+    def get_children(self, el):
+        children = set()
         # if they have a family
         if el.family_connections is not None:
             for fam_idn in el.family_connections:
@@ -89,7 +91,14 @@ class graph_representation:
                         children.add(c)
         return children
 
-    def get_side_nodes(self, el, cur_origls_p, diff=None):
+    def get_current_level_originless_partners(self):
+        result = set()
+        for p_id in self.current_level:
+            originless_partners = self.get_originless_partners(p_id)
+            result |= originless_partners
+        return result
+
+    def get_side_nodes(self, el, cur_origls_p, diff=None):  # TODO
         originless = self.get_originless_partners(el.idn)
         if diff is not None:
             originless = originless.difference(diff)
@@ -101,7 +110,7 @@ class graph_representation:
             for child_id in children:
                 child = self.data[child_id]
                 child.focus = value
-                self.focus_children(self.get_children(child, set()), value)
+                self.focus_children(self.get_children(child), value)
 
     def focus_parents(self, person, current_focus):
         if person.origin is not None:
@@ -121,12 +130,12 @@ class graph_representation:
         if not deselect:
             selected.focus = 0
             selected.select = True
-            self.focus_children(self.get_children(selected, set()))
+            self.focus_children(self.get_children(selected))
             self.focus_parents(selected, 0)
         else:
             selected.focus = -1
             selected.select = False
-            self.focus_children(self.get_children(selected, set()), -1)
+            self.focus_children(self.get_children(selected), -1)
             self.focus_parents(selected, -1)
         # self.data[idn] = selected
 
@@ -137,7 +146,9 @@ class graph_representation:
                 break
 
     def get_mark_direction(self, person):
-        children = self.get_children(person, set())
+        children = self.get_children(person)
+        if len(children) == 0:
+            return ('R', '?', '?')
         for child_id in children:
             child = self.data[child_id]
             if child.focus > -1:
@@ -145,63 +156,74 @@ class graph_representation:
                 if child_fam.head == person.idn:
                     partner = child_fam.partner
                     return ('R', partner, self.data[partner].origin)
+                else:
+                    return ('L', '?', '?')
         return ('?', '?', '?')
+
+    def tuples_to_list(tuples_to_sort, siblings):
+        result = []
+        for tup in tuples_to_sort:
+            lst = siblings.get(tup[2], [])
+            siblings.pop(tup[2], None)
+            lst += [tup[0]]
+            if len(tup) > 3:
+                lst += [tup[3]]
+                lst += siblings.get(tup[4], [])
+                siblings.pop(tup[4], None)
+            result += lst
+        for (fam_id, sibs_id_list) in siblings.items():
+            result += sibs_id_list
+        return result
 
     # takes set of ids returns tuple(A,
     # A - Right_side siblings, with selected F on last place
-    def sort_data(self, data):
-        data = list(data)
-        result = []
-        tuples_to_sort = []
-        selected_flag = False
+    def sort_current_level(self):
+        print('Start:', list(self.current_level))
+        (result, tuples_to_sort) = ([], [])
         siblings = {}  # famid -> list[id]
-        for p_id in data:
+        for p_id in list(self.current_level):
             person = self.data[p_id]
-            if person.origin is not None:
-                focus = person.focus
-                if focus == -1:
-                    print('pid', p_id)
-                    sibs = siblings.get(person.origin, None)
-                    if sibs is not None:
-                        siblings[person.origin] = sibs.append(p_id)
-                        print('add')
+            if (person.focus, person.origin) == (-1, None):
+                result.append(p_id)
+            elif person.focus == -1:
+                sibs = siblings.get(person.origin, []) + [p_id]
+                siblings.update({person.origin: sibs})
+            elif not self.selected:
+                # get marked children and check what is the connection
+                pos, part, p_orig = self.get_mark_direction(person)
+                if (pos, part, person.origin) == ('R', '?', None):
+                    if p_orig is not None:
+                        sibs = siblings.get(p_orig, []) + [p_id]
+                        siblings.update({p_orig: sibs})
                     else:
-                        siblings[person.origin] = [p_id]
-                        print('new')
-                elif not selected_flag:
-                    # get marked children and check what is the connection
-                    s, part, p_orig = self.get_mark_direction(person)
-                    if s == 'R':
-                        tup = (p_id, focus, person.origin, part, p_orig)
-                        tuples_to_sort.append(tup)
+                        result.append(p_id)
+                elif (pos, part) == ('R', '?'):
+                    sibs = siblings.get(person.origin, []) + [p_id]
+                    siblings.update({person.origin: sibs})
+                elif pos == 'R':
+                    tup = (p_id, person.focus, person.origin, part, p_orig)
+                    tuples_to_sort.append(tup)
                 else:
-                    result.append(p_id)
-        for tup in tuples_to_sort:
-            lst = siblings[tup[2]]
-            lst.append(tup[0])
-            lst.append(tup[3])
-            if siblings.get(tup[4], None) is not None:
-                lst += siblings[tup[4]]
-            result += lst
-        print("TPL:\n", tuples_to_sort)
-        print("Res:\n", result)
+                    tup = (p_id, person.focus, person.origin)
+                    tuples_to_sort.append(tup)
+            else:
+                result.append(p_id)
+            if person.select:
+                self.selected = True
+        tups = sorted(tuples_to_sort, key=lambda t: t[1])
+        result += graph_representation.tuples_to_list(tups, siblings)
+        self.current_level = result
 
-    def create_node(self, orig, next_lv, guardian=None):
-        if guardian is None:
-            data = self.current_level
-            self.sort_data(data)
-        else:
-            data = guardian
-        # self.sort_data(data)
-        # for el in data:
-        while not len(data) == 0:
-            el = self.data[data.pop()]
-            orig = self.get_side_nodes(el, orig, guardian)
-            next_lv = self.get_children(el, next_lv)
+    def draw_level_return_next(self):
+        next_lv = set()
+        print("bef:", self.current_level)
+        self.sort_current_level()
+        print("aft:", self.current_level)
+        for el_id in self.current_level:
+            el = self.data[el_id]
+            next_lv |= self.get_children(el)
             self.draw_node(el)
-        if guardian is None:
-            self.current_level = set()
-            return (orig, next_lv)
+        print('next', next_lv)
         return next_lv
 
     def create_nodes(self):
@@ -209,13 +231,12 @@ class graph_representation:
         # maybe change set to list or something
         print("Current lv:" + str(self.current_level))
         next_level = set()
-        originless_part = set()
+        originless = self.get_current_level_originless_partners()
+        self.current_level |= originless
         self.subtree = Tree()
-        self.subtree.attr(rank='same')
-        o, nl = self.create_node(originless_part, next_level)
-        originless_part, next_level = o, nl
-        ptnrs_g = originless_part
-        next_level = self.create_node(originless_part, next_level, ptnrs_g)
+        self.subtree.attr(rank='same', ordering='out')
+        self.selected = False
+        next_level = self.draw_level_return_next()
         self.tree.subgraph(self.subtree)
         if len(next_level) != 0:
             self.current_level = next_level
@@ -224,6 +245,7 @@ class graph_representation:
     def create_connections(self):
         for entry in self.data.values():
             if isinstance(entry, f):
+                print(entry.idn)
                 self.tree.edge(entry.head, entry.idn, arrowhead="none")
                 self.tree.edge(entry.idn, entry.partner, arrowhead="none")
                 if entry.family_connections is not None:
