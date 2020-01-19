@@ -1,4 +1,7 @@
-class env:
+from person import Person as p
+
+
+class Env:
 
     def __init__(self, env=None):
         if env is None:
@@ -8,16 +11,73 @@ class env:
         else:
             self.used_ids = env
 
-    def generateIdn(self):
-        new_idn = 0
-        self.used_ids.add(new_idn)
-        return new_idn
+    def generate_idn(self, id_type):
+        if id_type == 'person':
+            new_id = 'I'+str(self.next_indi_id)
+            self.next_indi_id += 1
+            return new_id
+        elif id_type == 'family':
+            new_id = 'F'+str(self.next_fam_id)
+            self.next_fam_id += 1
+            return new_id
 
     def addEntry(self, eid, value):
         self.used_ids[eid] = value
 
     def entries(self):
         return self.used_ids
+
+    def get_partners(self, idn):
+        fam_c_ids = self.used_ids[idn].family_connections
+        if fam_c_ids is None:
+            return None
+        else:
+            ids = set()
+            for fam_c_id in fam_c_ids:
+                family = self.used_ids[fam_c_id]
+                if family.head == idn:
+                    ids.add(family.partner)
+                else:
+                    ids.add(family.head)
+        return ids
+
+    def get_originless_partners(self, idn):
+        partners = self.get_partners(idn)
+        result = set()
+        if partners is not None:
+            for partner_id in partners:
+                partner = self.used_ids[partner_id]
+                if partner.origin is None:
+                    result.add(partner_id)
+        return result
+
+    def get_children(self, el):
+        children = set()
+        # if they have a family
+        if el.family_connections is not None:
+            for fam_idn in el.family_connections:
+                family = self.used_ids[fam_idn]
+                # if there are children in this family
+                if family.family_connections is not None:
+                    for c in family.family_connections:
+                        children.add(c)
+        return children
+
+    def find_top(self):
+        current_level = set()
+        for entry in self.used_ids.values():
+            if isinstance(entry, p) and entry.origin is None:
+                part_with_origin = False
+                partners = self.get_partners(entry.idn)
+                if partners is not None:
+                    for partner_id in list(partners):
+                        partner = self.used_ids[partner_id]
+                        if partner.origin is not None:
+                            part_with_origin = True
+                            break
+                if not part_with_origin:
+                    current_level.add(entry.idn)
+        return current_level
 
     def __str__(self):
         ret = ""

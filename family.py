@@ -1,4 +1,4 @@
-from Entry import Entry as ent
+from entry import Entry as ent
 
 
 class Family(ent):

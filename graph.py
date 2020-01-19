@@ -1,8 +1,8 @@
 # libs: Matplotlib, PyQt, Seaborn, Pandas
-# graphviz?
+# graphviz? sklearn overleap?
 from graphviz import Digraph as Tree
-from Person import Person as p
-from Family import Family as f
+from person import Person as p
+from family import Family as f
 
 
 class graph_representation:
@@ -27,45 +27,6 @@ class graph_representation:
     def send_data(self, data):
         self.data = data
 
-    def get_originless_partners(self, idn):
-        partners = self.get_partners(idn)
-        result = set()
-        if partners is not None:
-            for partner_id in partners:
-                partner = self.data[partner_id]
-                if partner.origin is None:
-                    result.add(partner_id)
-        return result
-
-    def get_partners(self, idn):
-        fam_c_ids = self.data[idn].family_connections
-        if fam_c_ids is None:
-            return None
-        else:
-            ids = set()
-            for fam_c_id in fam_c_ids:
-                family = self.data[fam_c_id]
-                if family.head == idn:
-                    ids.add(family.partner)
-                else:
-                    ids.add(family.head)
-        return ids
-
-    def find_top(self):
-        self.current_level = set()
-        for entry in self.data.values():
-            if isinstance(entry, p) and entry.origin is None:
-                part_with_origin = False
-                partners = self.get_partners(entry.idn)
-                if partners is not None:
-                    for partner_id in list(partners):
-                        partner = self.data[partner_id]
-                        if partner.origin is not None:
-                            part_with_origin = True
-                            break
-                if not part_with_origin:
-                    self.current_level.add(entry.idn)
-
     def draw_node(self, el):
         s = 'filled'
         # if they have a family
@@ -79,83 +40,64 @@ class graph_representation:
             c = graph_representation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
 
-    def get_children(self, el):
-        children = set()
-        # if they have a family
-        if el.family_connections is not None:
-            for fam_idn in el.family_connections:
-                family = self.data[fam_idn]
-                # if there are children in this family
-                if family.family_connections is not None:
-                    for c in family.family_connections:
-                        children.add(c)
-        return children
-
     def get_current_level_originless_partners(self):
         result = set()
         for p_id in self.current_level:
-            originless_partners = self.get_originless_partners(p_id)
+            originless_partners = self.data.get_originless_partners(p_id)
             result |= originless_partners
         return result
-
-    def get_side_nodes(self, el, cur_origls_p, diff=None):  # TODO
-        originless = self.get_originless_partners(el.idn)
-        if diff is not None:
-            originless = originless.difference(diff)
-        cur_origls_p = cur_origls_p.union(originless)
-        return cur_origls_p
 
     def focus_children(self, children, value=0):
         if len(children) > 0:
             for child_id in children:
-                child = self.data[child_id]
+                child = self.data.entries()[child_id]
                 child.focus = value
-                self.focus_children(self.get_children(child), value)
+                self.focus_children(self.data.get_children(child), value)
 
     def focus_parents(self, person, current_focus):
         if person.origin is not None:
-            bloodline = self.data[person.origin]
-            right_side = self.data[bloodline.head]
+            bloodline = self.data.entries()[person.origin]
+            right_side = self.data.entries()[bloodline.head]
             if current_focus > -1:
                 right_side.focus = current_focus + 1
             else:
                 right_side.focus = current_focus
             self.focus_parents(right_side, current_focus + 1)
-            left_side = self.data[bloodline.partner]
+            left_side = self.data.entries()[bloodline.partner]
             left_side.focus = current_focus
             self.focus_parents(left_side, current_focus)
 
     def select_node(self, idn, deselect=False):
-        selected = self.data[idn]
+        selected = self.data.entries()[idn]
         if not deselect:
             selected.focus = 0
             selected.select = True
-            self.focus_children(self.get_children(selected))
+            self.focus_children(self.data.get_children(selected))
             self.focus_parents(selected, 0)
         else:
             selected.focus = -1
             selected.select = False
-            self.focus_children(self.get_children(selected), -1)
+            self.focus_children(self.data.get_children(selected), -1)
             self.focus_parents(selected, -1)
-        # self.data[idn] = selected
+        # self.data.entries()[idn] = selected
 
     def deselect(self):
-        for entry in self.data.values():
+        for entry in self.data.entries().values():
             if isinstance(entry, p) and entry.select:
                 self.select_node(entry.idn, deselect=True)
                 break
 
     def get_mark_direction(self, person):
-        children = self.get_children(person)
+        children = self.data.get_children(person)
         if len(children) == 0:
             return ('R', '?', '?')
         for child_id in children:
-            child = self.data[child_id]
+            child = self.data.entries()[child_id]
             if child.focus > -1:
-                child_fam = self.data[child.origin]
+                child_fam = self.data.entries()[child.origin]
                 if child_fam.head == person.idn:
                     partner = child_fam.partner
-                    return ('R', partner, self.data[partner].origin)
+                    return ('R', partner, self.data.entries()[partner].origin)
                 else:
                     return ('L', '?', '?')
         return ('?', '?', '?')
@@ -178,11 +120,11 @@ class graph_representation:
     # takes set of ids returns tuple(A,
     # A - Right_side siblings, with selected F on last place
     def sort_current_level(self):
-        print('Start:', list(self.current_level))
+        # print('Start:', list(self.current_level))
         (result, tuples_to_sort) = ([], [])
         siblings = {}  # famid -> list[id]
         for p_id in list(self.current_level):
-            person = self.data[p_id]
+            person = self.data.entries()[p_id]
             if (person.focus, person.origin) == (-1, None):
                 result.append(p_id)
             elif person.focus == -1:
@@ -216,20 +158,20 @@ class graph_representation:
 
     def draw_level_return_next(self):
         next_lv = set()
-        print("bef:", self.current_level)
+        # print("bef:", self.current_level)
         self.sort_current_level()
-        print("aft:", self.current_level)
+        # print("aft:", self.current_level)
         for el_id in self.current_level:
-            el = self.data[el_id]
-            next_lv |= self.get_children(el)
+            el = self.data.entries()[el_id]
+            next_lv |= self.data.get_children(el)
             self.draw_node(el)
-        print('next', next_lv)
+        # print('next', next_lv)
         return next_lv
 
     def create_nodes(self):
         # TODO make sure the children are under their parents
         # maybe change set to list or something
-        print("Current lv:" + str(self.current_level))
+        # print("Current lv:" + str(self.current_level))
         next_level = set()
         originless = self.get_current_level_originless_partners()
         self.current_level |= originless
@@ -243,9 +185,9 @@ class graph_representation:
             self.create_nodes()
 
     def create_connections(self):
-        for entry in self.data.values():
+        for entry in self.data.entries().values():
             if isinstance(entry, f):
-                print(entry.idn)
+                # print(entry.idn)
                 self.tree.edge(entry.head, entry.idn, arrowhead="none")
                 self.tree.edge(entry.idn, entry.partner, arrowhead="none")
                 if entry.family_connections is not None:
@@ -254,8 +196,11 @@ class graph_representation:
 
     def show(self):
         self.tree = Tree()
-        self.find_top()
+        self.current_level = self.data.find_top()
         # sort by ranks
         self.create_nodes()
         self.create_connections()
+        # print(self.data.next_indi_id)
+
+        # print(self.data.next_fam_id)
         self.tree.view()

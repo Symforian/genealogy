@@ -1,6 +1,6 @@
-from tree_env import env as id_env
-from Person import Person as person
-from Family import Family as family
+from tree_env import Env as id_env
+from person import Person as person
+from family import Family as family
 # GEDCOM standard 5.5
 # http://homepages.rootsweb.com/~pmcbride/gedcom/55gcch1.htm
 
@@ -37,7 +37,10 @@ class GEDCOM_parser:
         if self.data_holder is not None:
             idn = str(self.data_holder.get_idn())
             self.env.addEntry(idn, self.data_holder)
-            # self.data_holder = None
+            if isinstance(self.data_holder, person):
+                self.env.next_indi_id += 1
+            elif isinstance(self.data_holder, family):
+                self.env.next_fam_id += 1
 
     # def fam_tag()
     #    self.data_holder.add(value[1:-1])

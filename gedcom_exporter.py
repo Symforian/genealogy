@@ -1,5 +1,5 @@
-from Person import Person as person
-from Family import Family as family
+from person import Person as person
+from family import Family as family
 from functools import reduce
 # GEDCOM standard 5.5
 # http://homepages.rootsweb.com/~pmcbride/gedcom/55gcch1.htm
