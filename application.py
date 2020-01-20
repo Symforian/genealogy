@@ -2,7 +2,7 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from program import program
-from pop_up_forms import pop_up_form as puf
+from pop_up_forms import pop_up_form as puf, pop_up_select as pus
 
 
 class app_window(QMainWindow):
@@ -80,16 +80,38 @@ class app_window(QMainWindow):
         self.prog.export_gedcom("ExportedGedcomData")
 
     def add_person(self):
-        pop = puf("Add person")
-        (n, s, b, d, o) = pop.getResults()
-        self.prog.add_entry(n, s, b, d, o)
-        self.prog.show()
+        origins = self.prog.get_ids_desc('family')
+        pop = puf("Add person", origins)
+        if pop.result() == pop.DialogCode.Accepted:
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.add_entry(n, s, b, d, o)
+            self.prog.show()
 
     def mod_person(self):
-        pass
+        people = self.prog.get_ids_desc('person')
+        if people != []:
+            pop = pus(people)
+            if pop.result() == pop.DialogCode.Accepted:
+                pid = pop.getResult()
+                data = self.prog.get_person_data(pid)
+                ori = self.prog.get_ids_desc('family')
+                pop = puf("Modify person", origins=ori, pdata=data)
+                (n, s, b, d, o) = pop.getResults()
+                self.prog.mod_entry(pid, n, s, b, d, o)
+                self.prog.show()
+        else:
+            print("Error no ppl to select from")
 
     def rem_person(self):
-        pass
+        people = self.prog.get_ids_desc('person')
+        if people != []:
+            pop = pus(people)
+            if pop.result() == pop.DialogCode.Accepted:
+                pid = pop.getResult()
+                self.prog.rem_entry(pid)
+                self.prog.show()
+        else:
+            print("Error no ppl to select from")
 
     def sel_person(self):
         pass

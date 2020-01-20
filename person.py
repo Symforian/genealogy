@@ -50,6 +50,15 @@ class Person(ent):
             ret += date[:-1]
         return ret
 
+    def desc(self):
+        temp = self.name[0] + " " + self.surname[0]
+        # temp += "\nOrigin: "+str(self.origin)+"Born:"+str(self.birth)
+        return temp  # +"\nDied: "+str(self.death)+"]\n"
+
+    def pdata(self):
+        temp = [self.name, self.surname, self.birth, self.death]
+        return temp + [self.origin]
+
     def __str__(self):
         temp = "[Person entry:\nName:"+str(self.name)+" "+str(self.surname)
         temp += "\nOrigin: "+str(self.origin)+"\nBorn:"+str(self.birth)

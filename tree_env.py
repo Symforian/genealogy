@@ -1,4 +1,5 @@
 from person import Person as p
+from family import Family as f
 
 
 class Env:
@@ -78,6 +79,29 @@ class Env:
                 if not part_with_origin:
                     current_level.add(entry.idn)
         return current_level
+
+    def get_fam_ids_desc(self):
+        ret = []
+        for (k, v) in self.used_ids.items():
+            if isinstance(v, f):
+                desc = self.used_ids[v.head].desc() + '&'
+                desc += self.used_ids[v.partner].desc()
+                i = int(k[1:])
+                ret += [(i, k, desc)]
+        ret.sort(key=lambda tup: tup[0])
+        ret = list(map(lambda t: (t[1], t[2]), ret))
+        return ret
+
+    def get_indi_ids_desc(self):
+        ret = []
+        for (k, v) in self.used_ids.items():
+            if isinstance(v, p):
+                desc = v.desc()
+                i = int(k[1:])
+                ret += [(i, k, desc)]
+        ret.sort(key=lambda tup: tup[0])
+        ret = list(map(lambda t: (t[1], t[2]), ret))
+        return ret
 
     def __str__(self):
         ret = ""
