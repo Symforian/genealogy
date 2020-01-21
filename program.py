@@ -37,15 +37,15 @@ class program:
 
     def add_entry(self, n, s, b, d, o):
         i = self.env.generate_idn('person')
-        self.create_entry(i, n, s, b, d, o)
+        self.create_person_entry(i, n, s, b, d, o)
 
     def mod_entry(self, i, n, s, b, d, o):
         self.rem_entry(i)
-        self.create_entry(i, n, s, b, d, o)
+        self.create_person_entry(i, n, s, b, d, o)
 
-    def create_entry(self, i, n, s, b, d, o):
+    def create_person_entry(self, i, n, s, b, d, o):
         new_person = per(idn=i, name=n, sname=s, birt=b, deat=d)
-        if o != 'Unknown':
+        if o != 0:
             new_person.addOrigin(o)
             self.env.entries()[o].add(i)
         self.env.addEntry(i, new_person)
@@ -77,12 +77,18 @@ class program:
     def get_person_data(self, pid):
         return self.env.entries()[pid].pdata()
 
-    def select(self):
+    def select(self, pid=None):
         self.drawer.send_data(self.env)
         self.drawer.deselect()
-        select = input("Enter idn:\n")
-        if select != '':
-            self.drawer.select_node(select)
+        if pid is not None:
+            self.drawer.select_node(pid)
+
+    def connect(self, hid, pid):
+        entries = self.env.entries()
+        fid = self.env.generate_idn('family')
+        entries[fid] = fam(fid, hid, pid, "Marriage")
+        entries[hid].add(fid)
+        entries[pid].add(fid)
 
 
 def main_cli():

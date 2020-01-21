@@ -71,7 +71,7 @@ class pop_up_form(QDialog):
         ret = [self.nl.text().split(), self.sl.text().split()]
         ret += [self.bl.text().split(), self.dl.text().split()]
         if self.origin.currentItem() is None:
-            ret += ['Unknown']
+            ret += [0]
         else:
             id = self.origin.row(self.origin.currentItem())
             ret += [self.origins[id][0]]

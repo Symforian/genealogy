@@ -34,10 +34,10 @@ class GEDCOM_exporter:
         ent += reduce(lambda a, b: a + ' ' + b, surname) + '\n2 GIVN '
         return ent + reduce(lambda a, b: a + ' ' + b, name) + '\n'
 
-    def write_birth(birth):
-        if birth is not None:
-            ent = '1 BIRT\n2 DATE '
-            ent += reduce(lambda a, b: a + ' ' + b, birth)
+    def write_event(date, event):
+        if date != []:
+            ent = '1 ' + event + '\n2 DATE '
+            ent += reduce(lambda a, b: a + ' ' + b, date)
             return ent + '\n'
         return ''
 
@@ -56,7 +56,8 @@ class GEDCOM_exporter:
     def write_indi(self, entry):
         ent = 'INDI\n'
         ent += GEDCOM_exporter.write_name(entry.name, entry.surname)
-        ent += GEDCOM_exporter.write_birth(entry.birth)
+        ent += GEDCOM_exporter.write_event(entry.birth, 'BIRT')
+        ent += GEDCOM_exporter.write_event(entry.birth, 'DEAT')
         ent += GEDCOM_exporter.write_origin(entry.origin)
         ent += GEDCOM_exporter.write_families(entry.family_connections)
         return ent

@@ -1,3 +1,6 @@
+# libs: Matplotlib, PyQt, Seaborn, Pandas
+# graphviz? sklearn overleap?
+# to check ^
 from gedcom_parser import GEDCOM_parser as ged_parse
 from gedcom_exporter import GEDCOM_exporter as ged_export
 from graph import graph_representation as g_r

@@ -50,10 +50,13 @@ class app_window(QMainWindow):
         addAct = self.add_m_el('&Add', "Ctrl+A", tip, self.add_person)
         tip = 'Modify person'
         modAct = self.add_m_el('&Modify', "Ctrl+M", tip, self.mod_person)
+        tip = 'Connect two people, either marriage or common children'
+        conAct = self.add_m_el('&Connect', "Ctrl+C", tip, self.connect)
         tip = 'Remove person'
         remAct = self.add_m_el('&Remove', "Ctrl+R", tip, self.rem_person)
         editMenu.addAction(addAct)
         editMenu.addAction(modAct)
+        editMenu.addAction(conAct)
         editMenu.addAction(remAct)
 
     def create_focusmenu(self, focusMenu):
@@ -69,9 +72,9 @@ class app_window(QMainWindow):
         self.prog = program()
 
     def file_open(self):
+        # TODO validate if .GED
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
         name = name[0][name[0].rfind('/')+1:-4]
-        print(name)
         self.prog.import_gedcom(name)
         self.prog.show()
 
@@ -80,6 +83,7 @@ class app_window(QMainWindow):
         self.prog.export_gedcom("ExportedGedcomData")
 
     def add_person(self):
+        # maybe add button to connect partner / head right away
         origins = self.prog.get_ids_desc('family')
         pop = puf("Add person", origins)
         if pop.result() == pop.DialogCode.Accepted:
@@ -87,37 +91,52 @@ class app_window(QMainWindow):
             self.prog.add_entry(n, s, b, d, o)
             self.prog.show()
 
-    def mod_person(self):
+    def chose_person(self):
         people = self.prog.get_ids_desc('person')
         if people != []:
             pop = pus(people)
             if pop.result() == pop.DialogCode.Accepted:
-                pid = pop.getResult()
-                data = self.prog.get_person_data(pid)
-                ori = self.prog.get_ids_desc('family')
-                pop = puf("Modify person", origins=ori, pdata=data)
-                (n, s, b, d, o) = pop.getResults()
-                self.prog.mod_entry(pid, n, s, b, d, o)
-                self.prog.show()
-        else:
-            print("Error no ppl to select from")
+                return (True, pop.getResult())
+        print("Error no ppl to select from")
+        return (False, None)
+
+    def mod_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            data = self.prog.get_person_data(results)
+            ori = self.prog.get_ids_desc('family')
+            pop = puf("Modify person", origins=ori, pdata=data)
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.mod_entry(results, n, s, b, d, o)
+            self.prog.show()
 
     def rem_person(self):
-        people = self.prog.get_ids_desc('person')
-        if people != []:
-            pop = pus(people)
-            if pop.result() == pop.DialogCode.Accepted:
-                pid = pop.getResult()
-                self.prog.rem_entry(pid)
-                self.prog.show()
-        else:
-            print("Error no ppl to select from")
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.rem_entry(results)
+            self.prog.show()
 
     def sel_person(self):
-        pass
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.select(results)
+            self.prog.show()
 
     def deselect(self):
-        pass
+        self.prog.select(None)
+        self.prog.show()
+        print(self.prog.env.entries())
+
+    def connect(self):
+        # maybe connecting family - child as well?
+        (found_head, result_head) = self.chose_person()
+        (found_partner, result_partner) = self.chose_person()
+        if found_head and found_partner:
+            if result_head != result_partner:
+                self.prog.connect(result_head, result_partner)
+                self.prog.show()
+            else:
+                print("Cannot connect to self")
 
 
 if __name__ == "__main__":

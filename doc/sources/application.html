@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.4" />
+<title>sources.application API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>sources.application</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import sys
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from program import program
+from pop_up_forms import pop_up_form as puf, pop_up_select as pus
+
+
+class app_window(QMainWindow):
+    def add_m_el(self, name, shortcut, tip, funct):
+        elementAction = QtWidgets.QAction(name, self)
+        elementAction.setShortcut(shortcut)
+        elementAction.setStatusTip(tip)
+        elementAction.triggered.connect(funct)
+        return elementAction
+
+    def __init__(self, p):
+        QMainWindow.__init__(self)
+        self.prog = p
+        self.setGeometry(200, 200, 800, 600)
+        self.setWindowTitle(&#34;Genealogy&#34;)
+        self.create_menubar()
+
+    def create_menubar(self):
+        mainMenu = QtWidgets.QMenuBar(self)
+        mainMenu.setObjectName(&#34;menubar&#34;)
+        self.statusbar = QtWidgets.QStatusBar(self)
+        self.statusbar.setObjectName(&#34;statusbar&#34;)
+        self.setStatusBar(self.statusbar)
+        fileMenu = mainMenu.addMenu(&#39;&amp;File&#39;)
+        fileMenu = self.create_filemenu(fileMenu)
+        editMenu = mainMenu.addMenu(&#39;&amp;Edit&#39;)
+        editMenu = self.create_editmenu(editMenu)
+        focusMenu = mainMenu.addMenu(&#39;&amp;Focus&#39;)
+        focusMenu = self.create_focusmenu(focusMenu)
+        self.setMenuBar(mainMenu)
+
+    def create_filemenu(self, fileMenu):
+        tip = &#39;New file&#39;
+        newAct = self.add_m_el(&#39;&amp;New&#39;, &#34;Ctrl+N&#34;, tip, self.file_new)
+        tip = &#39;Import GEDCOM file&#39;
+        importAct = self.add_m_el(&#39;&amp;Import&#39;, &#34;Ctrl+O&#34;, tip, self.file_open)
+        tip = &#39;Export GEDCOM file&#39;
+        exportAct = self.add_m_el(&#39;&amp;Export&#39;, &#34;Ctrl+E&#34;, tip, self.file_export)
+        fileMenu.addAction(newAct)
+        fileMenu.addAction(importAct)
+        fileMenu.addAction(exportAct)
+
+    def create_editmenu(self, editMenu):
+        tip = &#39;Add person&#39;
+        addAct = self.add_m_el(&#39;&amp;Add&#39;, &#34;Ctrl+A&#34;, tip, self.add_person)
+        tip = &#39;Modify person&#39;
+        modAct = self.add_m_el(&#39;&amp;Modify&#39;, &#34;Ctrl+M&#34;, tip, self.mod_person)
+        tip = &#39;Connect two people, either marriage or common children&#39;
+        conAct = self.add_m_el(&#39;&amp;Connect&#39;, &#34;Ctrl+C&#34;, tip, self.connect)
+        tip = &#39;Remove person&#39;
+        remAct = self.add_m_el(&#39;&amp;Remove&#39;, &#34;Ctrl+R&#34;, tip, self.rem_person)
+        editMenu.addAction(addAct)
+        editMenu.addAction(modAct)
+        editMenu.addAction(conAct)
+        editMenu.addAction(remAct)
+
+    def create_focusmenu(self, focusMenu):
+        tip = &#39;Select person&#39;
+        selAct = self.add_m_el(&#39;&amp;Select&#39;, &#34;Ctrl+F&#34;, tip, self.sel_person)
+        tip = &#39;Deselect&#39;
+        desAct = self.add_m_el(&#39;&amp;Deselect&#39;, &#34;Ctrl+D&#34;, tip, self.deselect)
+        focusMenu.addAction(selAct)
+        focusMenu.addAction(desAct)
+
+    def file_new(self):
+        # TODO somekind of warning
+        self.prog = program()
+
+    def file_open(self):
+        # TODO validate if .GED
+        name = QtWidgets.QFileDialog.getOpenFileName(self, &#39;Open File&#39;)
+        name = name[0][name[0].rfind(&#39;/&#39;)+1:-4]
+        self.prog.import_gedcom(name)
+        self.prog.show()
+
+    def file_export(self):
+        # TODO popup to chose name of file
+        self.prog.export_gedcom(&#34;ExportedGedcomData&#34;)
+
+    def add_person(self):
+        # maybe add button to connect partner / head right away
+        origins = self.prog.get_ids_desc(&#39;family&#39;)
+        pop = puf(&#34;Add person&#34;, origins)
+        if pop.result() == pop.DialogCode.Accepted:
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.add_entry(n, s, b, d, o)
+            self.prog.show()
+
+    def chose_person(self):
+        people = self.prog.get_ids_desc(&#39;person&#39;)
+        if people != []:
+            pop = pus(people)
+            if pop.result() == pop.DialogCode.Accepted:
+                return (True, pop.getResult())
+        else:
+            print(&#34;Error no ppl to select from&#34;)
+            return (False, None)
+
+    def mod_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            data = self.prog.get_person_data(results)
+            ori = self.prog.get_ids_desc(&#39;family&#39;)
+            pop = puf(&#34;Modify person&#34;, origins=ori, pdata=data)
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.mod_entry(results, n, s, b, d, o)
+            self.prog.show()
+
+
+    def rem_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.rem_entry(results)
+            self.prog.show()
+
+    def sel_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.select(results)
+            self.prog.show()
+
+    def deselect(self):
+        self.prog.select(None)
+        self.prog.show()
+        print(self.prog.env.entries())
+
+    def connect(self):
+        # maybe connecting family - child as well?
+        (found_head, result_head) = self.chose_person()
+        (found_partner, result_partner) = self.chose_person()
+        if found_head and found_partner:
+            if result_head != result_partner:
+                self.prog.connect(result_head, result_partner)
+                self.prog.show()
+            else:
+                print(&#34;Cannot connect to self&#34;)
+
+
+if __name__ == &#34;__main__&#34;:
+    app = QApplication(sys.argv)
+    window = app_window(program())
+    window.show()
+    sys.exit(app.exec_())</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="sources.application.app_window"><code class="flex name class">
+<span>class <span class="ident">app_window</span></span>
+<span>(</span><span>p)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>QMainWindow(parent: QWidget = None, flags: Union[Qt.WindowFlags, Qt.WindowType] = Qt.WindowFlags())</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class app_window(QMainWindow):
+    def add_m_el(self, name, shortcut, tip, funct):
+        elementAction = QtWidgets.QAction(name, self)
+        elementAction.setShortcut(shortcut)
+        elementAction.setStatusTip(tip)
+        elementAction.triggered.connect(funct)
+        return elementAction
+
+    def __init__(self, p):
+        QMainWindow.__init__(self)
+        self.prog = p
+        self.setGeometry(200, 200, 800, 600)
+        self.setWindowTitle(&#34;Genealogy&#34;)
+        self.create_menubar()
+
+    def create_menubar(self):
+        mainMenu = QtWidgets.QMenuBar(self)
+        mainMenu.setObjectName(&#34;menubar&#34;)
+        self.statusbar = QtWidgets.QStatusBar(self)
+        self.statusbar.setObjectName(&#34;statusbar&#34;)
+        self.setStatusBar(self.statusbar)
+        fileMenu = mainMenu.addMenu(&#39;&amp;File&#39;)
+        fileMenu = self.create_filemenu(fileMenu)
+        editMenu = mainMenu.addMenu(&#39;&amp;Edit&#39;)
+        editMenu = self.create_editmenu(editMenu)
+        focusMenu = mainMenu.addMenu(&#39;&amp;Focus&#39;)
+        focusMenu = self.create_focusmenu(focusMenu)
+        self.setMenuBar(mainMenu)
+
+    def create_filemenu(self, fileMenu):
+        tip = &#39;New file&#39;
+        newAct = self.add_m_el(&#39;&amp;New&#39;, &#34;Ctrl+N&#34;, tip, self.file_new)
+        tip = &#39;Import GEDCOM file&#39;
+        importAct = self.add_m_el(&#39;&amp;Import&#39;, &#34;Ctrl+O&#34;, tip, self.file_open)
+        tip = &#39;Export GEDCOM file&#39;
+        exportAct = self.add_m_el(&#39;&amp;Export&#39;, &#34;Ctrl+E&#34;, tip, self.file_export)
+        fileMenu.addAction(newAct)
+        fileMenu.addAction(importAct)
+        fileMenu.addAction(exportAct)
+
+    def create_editmenu(self, editMenu):
+        tip = &#39;Add person&#39;
+        addAct = self.add_m_el(&#39;&amp;Add&#39;, &#34;Ctrl+A&#34;, tip, self.add_person)
+        tip = &#39;Modify person&#39;
+        modAct = self.add_m_el(&#39;&amp;Modify&#39;, &#34;Ctrl+M&#34;, tip, self.mod_person)
+        tip = &#39;Connect two people, either marriage or common children&#39;
+        conAct = self.add_m_el(&#39;&amp;Connect&#39;, &#34;Ctrl+C&#34;, tip, self.connect)
+        tip = &#39;Remove person&#39;
+        remAct = self.add_m_el(&#39;&amp;Remove&#39;, &#34;Ctrl+R&#34;, tip, self.rem_person)
+        editMenu.addAction(addAct)
+        editMenu.addAction(modAct)
+        editMenu.addAction(conAct)
+        editMenu.addAction(remAct)
+
+    def create_focusmenu(self, focusMenu):
+        tip = &#39;Select person&#39;
+        selAct = self.add_m_el(&#39;&amp;Select&#39;, &#34;Ctrl+F&#34;, tip, self.sel_person)
+        tip = &#39;Deselect&#39;
+        desAct = self.add_m_el(&#39;&amp;Deselect&#39;, &#34;Ctrl+D&#34;, tip, self.deselect)
+        focusMenu.addAction(selAct)
+        focusMenu.addAction(desAct)
+
+    def file_new(self):
+        # TODO somekind of warning
+        self.prog = program()
+
+    def file_open(self):
+        # TODO validate if .GED
+        name = QtWidgets.QFileDialog.getOpenFileName(self, &#39;Open File&#39;)
+        name = name[0][name[0].rfind(&#39;/&#39;)+1:-4]
+        self.prog.import_gedcom(name)
+        self.prog.show()
+
+    def file_export(self):
+        # TODO popup to chose name of file
+        self.prog.export_gedcom(&#34;ExportedGedcomData&#34;)
+
+    def add_person(self):
+        # maybe add button to connect partner / head right away
+        origins = self.prog.get_ids_desc(&#39;family&#39;)
+        pop = puf(&#34;Add person&#34;, origins)
+        if pop.result() == pop.DialogCode.Accepted:
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.add_entry(n, s, b, d, o)
+            self.prog.show()
+
+    def chose_person(self):
+        people = self.prog.get_ids_desc(&#39;person&#39;)
+        if people != []:
+            pop = pus(people)
+            if pop.result() == pop.DialogCode.Accepted:
+                return (True, pop.getResult())
+        else:
+            print(&#34;Error no ppl to select from&#34;)
+            return (False, None)
+
+    def mod_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            data = self.prog.get_person_data(results)
+            ori = self.prog.get_ids_desc(&#39;family&#39;)
+            pop = puf(&#34;Modify person&#34;, origins=ori, pdata=data)
+            (n, s, b, d, o) = pop.getResults()
+            self.prog.mod_entry(results, n, s, b, d, o)
+            self.prog.show()
+
+
+    def rem_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.rem_entry(results)
+            self.prog.show()
+
+    def sel_person(self):
+        (was_found, results) = self.chose_person()
+        if was_found:
+            self.prog.select(results)
+            self.prog.show()
+
+    def deselect(self):
+        self.prog.select(None)
+        self.prog.show()
+        print(self.prog.env.entries())
+
+    def connect(self):
+        # maybe connecting family - child as well?
+        (found_head, result_head) = self.chose_person()
+        (found_partner, result_partner) = self.chose_person()
+        if found_head and found_partner:
+            if result_head != result_partner:
+                self.prog.connect(result_head, result_partner)
+                self.prog.show()
+            else:
+                print(&#34;Cannot connect to self&#34;)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>PyQt5.QtWidgets.QMainWindow</li>
+<li>PyQt5.QtWidgets.QWidget</li>
+<li>PyQt5.QtCore.QObject</li>
+<li>sip.wrapper</li>
+<li>PyQt5.QtGui.QPaintDevice</li>
+<li>sip.simplewrapper</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="sources.application.app_window.add_m_el"><code class="name flex">
+<span>def <span class="ident">add_m_el</span></span>(<span>self, name, shortcut, tip, funct)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_m_el(self, name, shortcut, tip, funct):
+    elementAction = QtWidgets.QAction(name, self)
+    elementAction.setShortcut(shortcut)
+    elementAction.setStatusTip(tip)
+    elementAction.triggered.connect(funct)
+    return elementAction</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.add_person"><code class="name flex">
+<span>def <span class="ident">add_person</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_person(self):
+    # maybe add button to connect partner / head right away
+    origins = self.prog.get_ids_desc(&#39;family&#39;)
+    pop = puf(&#34;Add person&#34;, origins)
+    if pop.result() == pop.DialogCode.Accepted:
+        (n, s, b, d, o) = pop.getResults()
+        self.prog.add_entry(n, s, b, d, o)
+        self.prog.show()</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.chose_person"><code class="name flex">
+<span>def <span class="ident">chose_person</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def chose_person(self):
+    people = self.prog.get_ids_desc(&#39;person&#39;)
+    if people != []:
+        pop = pus(people)
+        if pop.result() == pop.DialogCode.Accepted:
+            return (True, pop.getResult())
+    else:
+        print(&#34;Error no ppl to select from&#34;)
+        return (False, None)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.connect"><code class="name flex">
+<span>def <span class="ident">connect</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def connect(self):
+    # maybe connecting family - child as well?
+    (found_head, result_head) = self.chose_person()
+    (found_partner, result_partner) = self.chose_person()
+    if found_head and found_partner:
+        if result_head != result_partner:
+            self.prog.connect(result_head, result_partner)
+            self.prog.show()
+        else:
+            print(&#34;Cannot connect to self&#34;)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.create_editmenu"><code class="name flex">
+<span>def <span class="ident">create_editmenu</span></span>(<span>self, editMenu)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_editmenu(self, editMenu):
+    tip = &#39;Add person&#39;
+    addAct = self.add_m_el(&#39;&amp;Add&#39;, &#34;Ctrl+A&#34;, tip, self.add_person)
+    tip = &#39;Modify person&#39;
+    modAct = self.add_m_el(&#39;&amp;Modify&#39;, &#34;Ctrl+M&#34;, tip, self.mod_person)
+    tip = &#39;Connect two people, either marriage or common children&#39;
+    conAct = self.add_m_el(&#39;&amp;Connect&#39;, &#34;Ctrl+C&#34;, tip, self.connect)
+    tip = &#39;Remove person&#39;
+    remAct = self.add_m_el(&#39;&amp;Remove&#39;, &#34;Ctrl+R&#34;, tip, self.rem_person)
+    editMenu.addAction(addAct)
+    editMenu.addAction(modAct)
+    editMenu.addAction(conAct)
+    editMenu.addAction(remAct)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.create_filemenu"><code class="name flex">
+<span>def <span class="ident">create_filemenu</span></span>(<span>self, fileMenu)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_filemenu(self, fileMenu):
+    tip = &#39;New file&#39;
+    newAct = self.add_m_el(&#39;&amp;New&#39;, &#34;Ctrl+N&#34;, tip, self.file_new)
+    tip = &#39;Import GEDCOM file&#39;
+    importAct = self.add_m_el(&#39;&amp;Import&#39;, &#34;Ctrl+O&#34;, tip, self.file_open)
+    tip = &#39;Export GEDCOM file&#39;
+    exportAct = self.add_m_el(&#39;&amp;Export&#39;, &#34;Ctrl+E&#34;, tip, self.file_export)
+    fileMenu.addAction(newAct)
+    fileMenu.addAction(importAct)
+    fileMenu.addAction(exportAct)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.create_focusmenu"><code class="name flex">
+<span>def <span class="ident">create_focusmenu</span></span>(<span>self, focusMenu)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_focusmenu(self, focusMenu):
+    tip = &#39;Select person&#39;
+    selAct = self.add_m_el(&#39;&amp;Select&#39;, &#34;Ctrl+F&#34;, tip, self.sel_person)
+    tip = &#39;Deselect&#39;
+    desAct = self.add_m_el(&#39;&amp;Deselect&#39;, &#34;Ctrl+D&#34;, tip, self.deselect)
+    focusMenu.addAction(selAct)
+    focusMenu.addAction(desAct)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.create_menubar"><code class="name flex">
+<span>def <span class="ident">create_menubar</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_menubar(self):
+    mainMenu = QtWidgets.QMenuBar(self)
+    mainMenu.setObjectName(&#34;menubar&#34;)
+    self.statusbar = QtWidgets.QStatusBar(self)
+    self.statusbar.setObjectName(&#34;statusbar&#34;)
+    self.setStatusBar(self.statusbar)
+    fileMenu = mainMenu.addMenu(&#39;&amp;File&#39;)
+    fileMenu = self.create_filemenu(fileMenu)
+    editMenu = mainMenu.addMenu(&#39;&amp;Edit&#39;)
+    editMenu = self.create_editmenu(editMenu)
+    focusMenu = mainMenu.addMenu(&#39;&amp;Focus&#39;)
+    focusMenu = self.create_focusmenu(focusMenu)
+    self.setMenuBar(mainMenu)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.deselect"><code class="name flex">
+<span>def <span class="ident">deselect</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def deselect(self):
+    self.prog.select(None)
+    self.prog.show()
+    print(self.prog.env.entries())</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.file_export"><code class="name flex">
+<span>def <span class="ident">file_export</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def file_export(self):
+    # TODO popup to chose name of file
+    self.prog.export_gedcom(&#34;ExportedGedcomData&#34;)</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.file_new"><code class="name flex">
+<span>def <span class="ident">file_new</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def file_new(self):
+    # TODO somekind of warning
+    self.prog = program()</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.file_open"><code class="name flex">
+<span>def <span class="ident">file_open</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def file_open(self):
+    # TODO validate if .GED
+    name = QtWidgets.QFileDialog.getOpenFileName(self, &#39;Open File&#39;)
+    name = name[0][name[0].rfind(&#39;/&#39;)+1:-4]
+    self.prog.import_gedcom(name)
+    self.prog.show()</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.mod_person"><code class="name flex">
+<span>def <span class="ident">mod_person</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mod_person(self):
+    (was_found, results) = self.chose_person()
+    if was_found:
+        data = self.prog.get_person_data(results)
+        ori = self.prog.get_ids_desc(&#39;family&#39;)
+        pop = puf(&#34;Modify person&#34;, origins=ori, pdata=data)
+        (n, s, b, d, o) = pop.getResults()
+        self.prog.mod_entry(results, n, s, b, d, o)
+        self.prog.show()</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.rem_person"><code class="name flex">
+<span>def <span class="ident">rem_person</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rem_person(self):
+    (was_found, results) = self.chose_person()
+    if was_found:
+        self.prog.rem_entry(results)
+        self.prog.show()</code></pre>
+</details>
+</dd>
+<dt id="sources.application.app_window.sel_person"><code class="name flex">
+<span>def <span class="ident">sel_person</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sel_person(self):
+    (was_found, results) = self.chose_person()
+    if was_found:
+        self.prog.select(results)
+        self.prog.show()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="sources" href="index.html">sources</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="sources.application.app_window" href="#sources.application.app_window">app_window</a></code></h4>
+<ul class="two-column">
+<li><code><a title="sources.application.app_window.add_m_el" href="#sources.application.app_window.add_m_el">add_m_el</a></code></li>
+<li><code><a title="sources.application.app_window.add_person" href="#sources.application.app_window.add_person">add_person</a></code></li>
+<li><code><a title="sources.application.app_window.chose_person" href="#sources.application.app_window.chose_person">chose_person</a></code></li>
+<li><code><a title="sources.application.app_window.connect" href="#sources.application.app_window.connect">connect</a></code></li>
+<li><code><a title="sources.application.app_window.create_editmenu" href="#sources.application.app_window.create_editmenu">create_editmenu</a></code></li>
+<li><code><a title="sources.application.app_window.create_filemenu" href="#sources.application.app_window.create_filemenu">create_filemenu</a></code></li>
+<li><code><a title="sources.application.app_window.create_focusmenu" href="#sources.application.app_window.create_focusmenu">create_focusmenu</a></code></li>
+<li><code><a title="sources.application.app_window.create_menubar" href="#sources.application.app_window.create_menubar">create_menubar</a></code></li>
+<li><code><a title="sources.application.app_window.deselect" href="#sources.application.app_window.deselect">deselect</a></code></li>
+<li><code><a title="sources.application.app_window.file_export" href="#sources.application.app_window.file_export">file_export</a></code></li>
+<li><code><a title="sources.application.app_window.file_new" href="#sources.application.app_window.file_new">file_new</a></code></li>
+<li><code><a title="sources.application.app_window.file_open" href="#sources.application.app_window.file_open">file_open</a></code></li>
+<li><code><a title="sources.application.app_window.mod_person" href="#sources.application.app_window.mod_person">mod_person</a></code></li>
+<li><code><a title="sources.application.app_window.rem_person" href="#sources.application.app_window.rem_person">rem_person</a></code></li>
+<li><code><a title="sources.application.app_window.sel_person" href="#sources.application.app_window.sel_person">sel_person</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.4</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
