@@ -33,7 +33,7 @@ class program:
 
     def show(self):
         self.drawer.send_data(self.env)
-        self.drawer.show()
+        return self.drawer.show()
 
     def add_entry(self, n, s, b, d, o):
         i = self.env.generate_idn('person')

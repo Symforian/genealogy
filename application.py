@@ -1,6 +1,8 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
+                             QWidget, QScrollArea)
+from PyQt5.QtGui import QPixmap
 from program import program
 from pop_up_forms import pop_up_form as puf, pop_up_select as pus
 
@@ -19,6 +21,24 @@ class app_window(QMainWindow):
         self.setGeometry(200, 200, 800, 600)
         self.setWindowTitle("Genealogy")
         self.create_menubar()
+        self.create_imgbox_area()
+
+    def create_imgbox_area(self):
+        self.imgbox = QLabel(self)
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        self.lay = QVBoxLayout(self.central_widget)
+        self.scroll = QScrollArea()
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setWidget(self.imgbox)
+        self.lay.addWidget(self.scroll)
+
+    def update_imgbox(self, name):
+        print(name)
+        self.pixmap = QPixmap(name)
+        self.imgbox.setPixmap(self.pixmap)
+        self.resize(self.pixmap.width(), self.pixmap.height())
+        self.show()
 
     def create_menubar(self):
         mainMenu = QtWidgets.QMenuBar(self)
@@ -41,9 +61,12 @@ class app_window(QMainWindow):
         importAct = self.add_m_el('&Import', "Ctrl+O", tip, self.file_open)
         tip = 'Export GEDCOM file'
         exportAct = self.add_m_el('&Export', "Ctrl+E", tip, self.file_export)
+        tip = 'Closes program without saving'
+        closeAct = self.add_m_el('&Quit', "Esc", tip, self.close)
         fileMenu.addAction(newAct)
         fileMenu.addAction(importAct)
         fileMenu.addAction(exportAct)
+        fileMenu.addAction(closeAct)
 
     def create_editmenu(self, editMenu):
         tip = 'Add person'
@@ -76,7 +99,7 @@ class app_window(QMainWindow):
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
         name = name[0][name[0].rfind('/')+1:-4]
         self.prog.import_gedcom(name)
-        self.prog.show()
+        self.update_imgbox(self.prog.show())
 
     def file_export(self):
         # TODO popup to chose name of file
@@ -89,7 +112,7 @@ class app_window(QMainWindow):
         if pop.result() == pop.DialogCode.Accepted:
             (n, s, b, d, o) = pop.getResults()
             self.prog.add_entry(n, s, b, d, o)
-            self.prog.show()
+            self.update_imgbox(self.prog.show())
 
     def chose_person(self):
         people = self.prog.get_ids_desc('person')
@@ -108,23 +131,23 @@ class app_window(QMainWindow):
             pop = puf("Modify person", origins=ori, pdata=data)
             (n, s, b, d, o) = pop.getResults()
             self.prog.mod_entry(results, n, s, b, d, o)
-            self.prog.show()
+            self.update_imgbox(self.prog.show())
 
     def rem_person(self):
         (was_found, results) = self.chose_person()
         if was_found:
             self.prog.rem_entry(results)
-            self.prog.show()
+            self.update_imgbox(self.prog.show())
 
     def sel_person(self):
         (was_found, results) = self.chose_person()
         if was_found:
             self.prog.select(results)
-            self.prog.show()
+            self.update_imgbox(self.prog.show())
 
     def deselect(self):
         self.prog.select(None)
-        self.prog.show()
+        self.update_imgbox(self.prog.show())
         print(self.prog.env.entries())
 
     def connect(self):
@@ -142,5 +165,5 @@ class app_window(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = app_window(program())
-    window.show()
+    window.showFullScreen()
     sys.exit(app.exec_())

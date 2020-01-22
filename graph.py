@@ -306,7 +306,7 @@ class graph_representation:
                     for c in entry.family_connections:
                         self.tree.edge(entry.idn, c)
 
-    def show(self):
+    def show(self, just_show=False):
         '''
         Main method to display proper tree.
         '''
@@ -318,5 +318,7 @@ class graph_representation:
         self.create_connections()
         # print(self.data.next_indi_id)
 
-        # print(self.data.next_fam_id)
-        self.tree.view()
+        if just_show:
+            self.tree.view()
+        else:
+            return self.tree.render(format='jpeg')

@@ -27,7 +27,7 @@ class command_line_interface:
 
     def show(self):
         self.drawer.send_data(self.env)
-        self.drawer.show()
+        self.drawer.show(just_show=True)
 
     def select(self):
         self.drawer.send_data(self.env)
