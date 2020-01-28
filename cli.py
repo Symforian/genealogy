@@ -1,27 +1,27 @@
 # libs: Matplotlib, PyQt, Seaborn, Pandas
 # graphviz? sklearn overleap?
 # to check ^
-from gedcom_parser import GEDCOM_parser as ged_parse
-from gedcom_exporter import GEDCOM_exporter as ged_export
-from graph import graph_representation as g_r
-from person import Person as per
-from family import Family as fam
+from gedcom_parser import GedcomParser as GP
+from gedcom_exporter import GedcomExporter as GE
+from graph import GraphRepresentation as GR
+from person import Person
+from family import Family
 
 
-class command_line_interface:
+class CommandLineInterface:
     def __init__(self):
         self.env = None
-        self.drawer = g_r()
+        self.drawer = GR()
         self.running = True
 
     def import_gedcom(self):
-        parser = ged_parse(input("Enter filename\n"))
+        parser = GP(input("Enter filename\n"))
         self.env = parser.parse()
 
     def export_gedcom(self):
         if self.env is not None:
             msg = "Enter filename\n"
-            ged_export(input(msg), self.env.entries()).export()
+            GE(input(msg), self.env.entries()).export()
         else:
             print("No data to export\n")
 
@@ -44,9 +44,9 @@ class command_line_interface:
             return self.env.entries()
         items = list(self.env.entries().items())
         if part in ('p', 'person', 'persons'):
-            print(list(filter(lambda t: isinstance(t[1], per), items)))
+            print(list(filter(lambda t: isinstance(t[1], Person), items)))
         elif part in ('f', 'family', 'families'):
-            print(list(filter(lambda t: isinstance(t[1], fam), items)))
+            print(list(filter(lambda t: isinstance(t[1], Family), items)))
 
     def enter_date():
         d = input("Enter day:\n")
@@ -54,7 +54,7 @@ class command_line_interface:
         y = input("Enter year:\n")
         date = [d, m, y]
         if all(data == '' for data in date):
-            date = per.u
+            date = Person.u
         return date
 
     def add_entry(self):
@@ -62,15 +62,15 @@ class command_line_interface:
         n = input("Enter name:\n").split()
         s = input("Enter surname:\n").split()
         print("Birth:")
-        b = command_line_interface.enter_date()
+        b = CommandLineInterface.enter_date()
         d = input("Is alive?[enter = yes]:\n")
         if d == '':
             d = ['']
         else:
             print("Death:")
-            d = command_line_interface.enter_date()
+            d = CommandLineInterface.enter_date()
 
-        new_person = per(idn=i, name=n, sname=s, birt=b, deat=d)
+        new_person = Person(idn=i, name=n, sname=s, birt=b, deat=d)
         self.env.entries()[i] = new_person
 
     def check_entry(self):
@@ -93,7 +93,7 @@ class command_line_interface:
             entries[p].depth = h_d
         elif p_d > h_d:
             entries[h].depth = p_d
-        entries[idn] = fam(idn, h, p, r)
+        entries[idn] = Family(idn, h, p, r)
         entries[h].add(idn)
         entries[p].add(idn)
 
@@ -103,7 +103,7 @@ class command_line_interface:
         value = input("Enter value:\n")
         if data in ('name', 'surname', 'birth', 'death'):
             if value == '':
-                value = per.u
+                value = Person.u
             else:
                 value = value.split()
         elif data == 'origin':
@@ -114,7 +114,7 @@ class command_line_interface:
             # also not safe    V  might not exist
             self.env.entries()[idn].depth = n_depth
         # need to check if V exists
-        self.env.entries()[idn].updateData(data, value)
+        self.env.entries()[idn].update_data(data, value)
 
     def quit(self):
         self.running = False

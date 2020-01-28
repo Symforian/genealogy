@@ -1,7 +1,9 @@
 
+
 # genealogy
 ## Requirements
-The genealogy program requires graphviz and PyQt5 
+The genealogy program requires graphviz and PyQt5
+
 Installing graphviz:
 
     sudo apt-get install graphviz
@@ -9,7 +11,11 @@ Installing graphviz:
 Installing PyQt5:
 
     sudo apt-get install python3-pyqt5
- Other dependencies should be in virtual environment.
+
+Other dependencies are in `requirements.txt`.
+
+Use:
+	`pip install -r requirements.txt`
 
 ## Running
 Enter the virtual environment
@@ -28,4 +34,14 @@ Run the genealogy program
 Run
 
 	python3 -m unittest tests_tree_env.py
+
+## Documentation
+As for now only few files are documented:
+
+    tree_env.py
+    graph.py
+    application.py
+    tree_env.py
+    program.py 
+
 

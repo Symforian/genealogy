@@ -1,7 +1,7 @@
-from entry import Entry as ent
+from entry import Entry
 
 
-class Person(ent):
+class Person(Entry):
 
     # idn None = not yet assigned, other None = unknown
     u = ['Unknown']
@@ -18,10 +18,10 @@ class Person(ent):
         self.origin = None  # string(idn_fam)
         self.family_connections = None  # list of string(idn_fam)
 
-    def addOrigin(self, origin):
+    def add_origin(self, origin):
         self.origin = origin
 
-    def updateData(self, data, new_value):
+    def update_data(self, data, new_value):
         if data == "name":
             self.name = new_value
         elif data == "surname":

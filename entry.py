@@ -9,5 +9,5 @@ class Entry:
         else:
             self.family_connections.append(arg)
 
-    def updateData(self, data, new_value):
+    def update_data(self, data, new_value):
         pass

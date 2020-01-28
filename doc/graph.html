@@ -6,11 +6,7 @@
 <meta name="generator" content="pdoc 0.7.4" />
 <title>graph API documentation</title>
 <meta name="description" content="Contains graph representation.
-Is responsible for:
-Drawing nodes and edges.
-Sorting nodes.
-Focus select.
-Using graphviz to generate image." />
+Is responsible for: …" />
 <link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
 <link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
@@ -26,73 +22,81 @@ Using graphviz to generate image." />
 </header>
 <section id="section-intro">
 <p>Contains graph representation.
-Is responsible for:
-Drawing nodes and edges.
-Sorting nodes.
-Focus select.
-Using graphviz to generate image.</p>
+Is responsible for:</p>
+<p>Drawing nodes and edges.</p>
+<p>Sorting nodes.</p>
+<p>Focus select.</p>
+<p>Using graphviz to generate image.</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">&#39;&#39;&#39;
+<pre><code class="python">&#34;&#34;&#34;
     Contains graph representation.
     Is responsible for:
+
     Drawing nodes and edges.
+
     Sorting nodes.
+
     Focus select.
+
     Using graphviz to generate image.
-&#39;&#39;&#39;
+&#34;&#34;&#34;
 from graphviz import Digraph as Tree
-from person import Person as p
-from family import Family as f
+from person import Person
+from family import Family
 
 
-class graph_representation:
+class GraphRepresentation:
 
-    node_color = {
+    NODE_COLOR = {
         &#34;default&#34;: &#39;#E2C94B&#39;,
         &#34;focused&#34;: &#39;#764141&#39;,
         &#34;selected&#34;: &#39;#A94949&#39;,
     }
+    &#34;&#34;&#34;Map program&#39;s description of node&#39;s color representation
+    to proper color.&#34;&#34;&#34;
 
     def get_color(focus, selected):
-        &#39;&#39;&#39;
-            Maps focus integer from person to color
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Map focus integer from person to color.&#34;&#34;&#34;
         if selected:
-            return graph_representation.node_color[&#39;selected&#39;]
+            return GraphRepresentation.NODE_COLOR[&#39;selected&#39;]
         if focus &gt;= 0:
-            return graph_representation.node_color[&#39;focused&#39;]
-        return graph_representation.node_color[&#39;default&#39;]
+            return GraphRepresentation.NODE_COLOR[&#39;focused&#39;]
+        return GraphRepresentation.NODE_COLOR[&#39;default&#39;]
 
     def __init__(self, data=None):
+        &#34;&#34;&#34;Create a new graph representation.
+
+        If `data` is `None`, the representation&#39;s enviroment is empty.
+        &#34;&#34;&#34;
         self.data = data
         self.current_level = set()
+        self.selected = False
 
     def send_data(self, data):
         self.data = data
 
     def draw_node(self, el):
-        &#39;&#39;&#39;
-            Draws node from person class element. Also draws family node.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw node from person class element and it&#39;s family node if exists.
+
+        Argument:
+
+        *el* -- element which node will be drawn
+        &#34;&#34;&#34;
         s = &#39;filled&#39;
-        # if they have a family
         if el.family_connections is not None:
             for fam_idn in el.family_connections:
-                # family nodes are drawn twice!!! TODO
                 self.subtree.node(fam_idn, shape=&#34;point&#34;)
-                c = graph_representation.get_color(el.focus, el.select)
+                c = GraphRepresentation.get_color(el.focus, el.select)
                 self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
         else:
-            c = graph_representation.get_color(el.focus, el.select)
+            c = GraphRepresentation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
 
     def get_current_level_originless_partners(self):
-        &#39;&#39;&#39;
-            Returns set of people who do not have origin family specified.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Return set of people who do not have origin family specified.&#34;&#34;&#34;
         result = set()
         for p_id in self.current_level:
             originless_partners = self.data.get_originless_partners(p_id)
@@ -100,10 +104,16 @@ class graph_representation:
         return result
 
     def focus_children(self, children, value=0):
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;
             Change focus value of children to the given value.
             Then the same to children&#39;s children and so on.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *children* -- set of children to focus on.
+
+        *value* -- optional value to change children value.
+        &#34;&#34;&#34;
         if len(children) &gt; 0:
             for child_id in children:
                 child = self.data.entries()[child_id]
@@ -111,10 +121,16 @@ class graph_representation:
                 self.focus_children(self.data.get_children(child), value)
 
     def focus_parents(self, person, current_focus):
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;
             Change focus value of ascendants to the proper value.
             Then the same to ascendants&#39;s ascendants and so on.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *person* -- person whose parents we want to focus.
+
+        *current_focus* -- current focus value to pass on ascendants.
+        &#34;&#34;&#34;
         if person.origin is not None:
             bloodline = self.data.entries()[person.origin]
             right_side = self.data.entries()[bloodline.head]
@@ -128,10 +144,16 @@ class graph_representation:
             self.focus_parents(left_side, current_focus)
 
     def select_node(self, idn, deselect=False):
-        &#39;&#39;&#39;
-            Focuses on node changing it&#39;s color.
+        &#34;&#34;&#34;
+            Change node&#39;s color.
             Colors straight line ascendants and descendants.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *idn* -- person who focus and select values we are changing.
+
+        *deselect* -- if `True` clears select and focus values.
+        &#34;&#34;&#34;
         selected = self.data.entries()[idn]
         if not deselect:
             selected.focus = 0
@@ -143,21 +165,16 @@ class graph_representation:
             selected.select = False
             self.focus_children(self.data.get_children(selected), -1)
             self.focus_parents(selected, -1)
-        # self.data.entries()[idn] = selected
 
     def deselect(self):
-        &#39;&#39;&#39;
-            Clears focus value.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Set all nodes&#39; color to default.&#34;&#34;&#34;
         for entry in self.data.entries().values():
-            if isinstance(entry, p) and entry.select:
+            if isinstance(entry, Person) and entry.select:
                 self.select_node(entry.idn, deselect=True)
                 break
 
     def get_mark_direction(self, person):
-        &#39;&#39;&#39;
-            Checks person&#39;s position to the selected node.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Check person&#39;s position to the selected node.&#34;&#34;&#34;
         children = self.data.get_children(person)
         if len(children) == 0:
             return (&#39;R&#39;, &#39;?&#39;, &#39;?&#39;)
@@ -173,9 +190,7 @@ class graph_representation:
         return (&#39;?&#39;, &#39;?&#39;, &#39;?&#39;)
 
     def tuples_to_list(tuples_to_sort, siblings):
-        &#39;&#39;&#39;
-            Takes tuples of 3 and 5 and changes them to the list.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Take tuples of 3 and 5 and changes them to the list.&#34;&#34;&#34;
         result = []
         for tup in tuples_to_sort:
             lst = siblings.get(tup[2], [])
@@ -190,17 +205,68 @@ class graph_representation:
             result += sibs_id_list
         return result
 
-    # takes set of ids returns tuple(A,
-    # A - Right_side siblings, with selected F on last place
+    def get_pos_row_partners(self, pid, row):
+        &#34;&#34;&#34;Return position of person, and partners.&#34;&#34;&#34;
+        partn_list = []
+        sp_pos = &#39;R&#39;
+        selected_person = self.data.entries()[pid]
+        if selected_person.family_connections is not None:
+            any_fc_id = selected_person.family_connections[0]
+            any_fc = self.data.entries()[any_fc_id]
+            if any_fc.partner == pid:
+                sp_pos = &#39;L&#39;
+            for fc in selected_person.family_connections:
+                if sp_pos == &#39;R&#39;:
+                    partn_list += [fc.partner]
+                    row.remove(fc.partner)
+                else:
+                    partn_list += [fc.head]
+                    row.remove(fc.head)
+        return (sp_pos, row, partn_list)
+
+    def get_siblings(self, selected_person_idn, row):
+        &#34;&#34;&#34;Return siblings of person, and the rest of the row.&#34;&#34;&#34;
+        sibs = []
+        selected_person = self.data.entries()[selected_person_idn]
+        if selected_person.origin is not None:
+            sp_fam = self.data.entries()[selected_person.origin]
+            for p_id in row:
+                if self.data.entries()[p_id].origin == sp_fam:
+                    sibs += [p_id]
+            row -= sibs
+        return (sibs, row)
+
+    def sort_selected_row(self, selected_person_idn):
+        &#34;&#34;&#34;Sort the row in which, there is the selected person&#34;&#34;&#34;
+        self.current_level -= selected_person_idn
+        rest = list(self.current_level)
+        (rest, ssibs) = self.get_siblings(selected_person_idn, rest)
+        (pos, rest, par) = self.get_pos_row_partners(selected_person_idn, rest)
+        result = []
+        if pos == &#39;R&#39;:
+            r = list(map(lambda x: [self.data.get_partners(x)]+[x], ssibs))
+
+        else:
+            r = list(map(lambda x: [x]+[self.data.get_partners(x)], ssibs))
+        result = (lambda l: [item for sublist in l for item in sublist])(r)
+        rest -= result
+        result += [selected_person_idn]
+        result += rest
+        return result
+
     def sort_current_level(self):
-        &#39;&#39;&#39;
-            Sorts current row of nodes to:
-            [SHS] SH SP [SPS]
-            SH - selected head node
-            SP - selected partner node
-            [Sx] - siblings of x
-        &#39;&#39;&#39;
-        # print(&#39;Start:&#39;, list(self.current_level))
+        &#34;&#34;&#34;
+            Sort current row of nodes to:
+
+            `[SHS] SH SP [SPS]`
+
+            `SH` -- selected head node.
+
+            `SP` -- selected partner node.
+
+            `[Sx]` -- siblings of x.
+        &#34;&#34;&#34;
+        was_selected_person_printed = self.selected
         (result, tuples_to_sort) = ([], [])
         siblings = {}  # famid -&gt; list[id]
         for p_id in list(self.current_level):
@@ -210,8 +276,7 @@ class graph_representation:
             elif person.focus == -1:
                 sibs = siblings.get(person.origin, []) + [p_id]
                 siblings.update({person.origin: sibs})
-            elif not self.selected:
-                # get marked children and check what is the connection
+            elif not was_selected_person_printed:
                 pos, part, p_orig = self.get_mark_direction(person)
                 if (pos, part, person.origin) == (&#39;R&#39;, &#39;?&#39;, None):
                     if p_orig is not None:
@@ -233,37 +298,28 @@ class graph_representation:
             if person.select:
                 self.selected = True
         tups = sorted(tuples_to_sort, key=lambda t: t[1])
-        result += graph_representation.tuples_to_list(tups, siblings)
+        result += GraphRepresentation.tuples_to_list(tups, siblings)
         self.current_level = result
 
     def draw_level_return_next(self):
-        &#39;&#39;&#39;
-            Draws current row of nodes.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw current row of nodes.&#34;&#34;&#34;
         next_lv = set()
-        # print(&#34;bef:&#34;, self.current_level)
         self.sort_current_level()
-        # print(&#34;aft:&#34;, self.current_level)
         for el_id in self.current_level:
             el = self.data.entries()[el_id]
             next_lv |= self.data.get_children(el)
             self.draw_node(el)
-        # print(&#39;next&#39;, next_lv)
         return next_lv
 
     def create_nodes(self):
-        &#39;&#39;&#39;
-            Creates nodes. Manages subtrees (rows).
-        &#39;&#39;&#39;
-        # TODO make sure the children are under their parents
-        # maybe change set to list or something
-        # print(&#34;Current lv:&#34; + str(self.current_level))
+        &#34;&#34;&#34;
+            Create nodes. Manage subtrees (rows).
+        &#34;&#34;&#34;
         next_level = set()
         originless = self.get_current_level_originless_partners()
         self.current_level |= originless
         self.subtree = Tree()
         self.subtree.attr(rank=&#39;same&#39;, ordering=&#39;out&#39;)
-        self.selected = False
         next_level = self.draw_level_return_next()
         self.tree.subgraph(self.subtree)
         if len(next_level) != 0:
@@ -271,31 +327,29 @@ class graph_representation:
             self.create_nodes()
 
     def create_connections(self):
-        &#39;&#39;&#39;
-        Draws edges.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw edges.&#34;&#34;&#34;
         for entry in self.data.entries().values():
-            if isinstance(entry, f):
-                # print(entry.idn)
+            if isinstance(entry, Family):
                 self.tree.edge(entry.head, entry.idn, arrowhead=&#34;none&#34;)
                 self.tree.edge(entry.idn, entry.partner, arrowhead=&#34;none&#34;)
                 if entry.family_connections is not None:
                     for c in entry.family_connections:
                         self.tree.edge(entry.idn, c)
 
-    def show(self):
-        &#39;&#39;&#39;
-        Main method to display proper tree.
-        &#39;&#39;&#39;
+    def show(self, just_show=False):
+        &#34;&#34;&#34;Display proper tree.
+           If `just_show` is `False` return the tree instead.
+        &#34;&#34;&#34;
         self.tree = Tree()
         self.current_level = self.data.find_top()
-        # sort by ranks
+        self.selected = False
         self.create_nodes()
         self.create_connections()
-        # print(self.data.next_indi_id)
 
-        # print(self.data.next_fam_id)
-        self.tree.view()</code></pre>
+        if just_show:
+            self.tree.view()
+        else:
+            return self.tree.render(format=&#39;jpeg&#39;)</code></pre>
 </details>
 </section>
 <section>
@@ -307,61 +361,66 @@ class graph_representation:
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="graph.graph_representation"><code class="flex name class">
-<span>class <span class="ident">graph_representation</span></span>
+<dt id="graph.GraphRepresentation"><code class="flex name class">
+<span>class <span class="ident">GraphRepresentation</span></span>
 <span>(</span><span>data=None)</span>
 </code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>Create a new graph representation.</p>
+<p>If <code>data</code> is <code>None</code>, the representation's enviroment is empty.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">class graph_representation:
+<pre><code class="python">class GraphRepresentation:
 
-    node_color = {
+    NODE_COLOR = {
         &#34;default&#34;: &#39;#E2C94B&#39;,
         &#34;focused&#34;: &#39;#764141&#39;,
         &#34;selected&#34;: &#39;#A94949&#39;,
     }
+    &#34;&#34;&#34;Map program&#39;s description of node&#39;s color representation
+    to proper color.&#34;&#34;&#34;
 
     def get_color(focus, selected):
-        &#39;&#39;&#39;
-            Maps focus integer from person to color
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Map focus integer from person to color.&#34;&#34;&#34;
         if selected:
-            return graph_representation.node_color[&#39;selected&#39;]
+            return GraphRepresentation.NODE_COLOR[&#39;selected&#39;]
         if focus &gt;= 0:
-            return graph_representation.node_color[&#39;focused&#39;]
-        return graph_representation.node_color[&#39;default&#39;]
+            return GraphRepresentation.NODE_COLOR[&#39;focused&#39;]
+        return GraphRepresentation.NODE_COLOR[&#39;default&#39;]
 
     def __init__(self, data=None):
+        &#34;&#34;&#34;Create a new graph representation.
+
+        If `data` is `None`, the representation&#39;s enviroment is empty.
+        &#34;&#34;&#34;
         self.data = data
         self.current_level = set()
+        self.selected = False
 
     def send_data(self, data):
         self.data = data
 
     def draw_node(self, el):
-        &#39;&#39;&#39;
-            Draws node from person class element. Also draws family node.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw node from person class element and it&#39;s family node if exists.
+
+        Argument:
+
+        *el* -- element which node will be drawn
+        &#34;&#34;&#34;
         s = &#39;filled&#39;
-        # if they have a family
         if el.family_connections is not None:
             for fam_idn in el.family_connections:
-                # family nodes are drawn twice!!! TODO
                 self.subtree.node(fam_idn, shape=&#34;point&#34;)
-                c = graph_representation.get_color(el.focus, el.select)
+                c = GraphRepresentation.get_color(el.focus, el.select)
                 self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
         else:
-            c = graph_representation.get_color(el.focus, el.select)
+            c = GraphRepresentation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
 
     def get_current_level_originless_partners(self):
-        &#39;&#39;&#39;
-            Returns set of people who do not have origin family specified.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Return set of people who do not have origin family specified.&#34;&#34;&#34;
         result = set()
         for p_id in self.current_level:
             originless_partners = self.data.get_originless_partners(p_id)
@@ -369,10 +428,16 @@ class graph_representation:
         return result
 
     def focus_children(self, children, value=0):
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;
             Change focus value of children to the given value.
             Then the same to children&#39;s children and so on.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *children* -- set of children to focus on.
+
+        *value* -- optional value to change children value.
+        &#34;&#34;&#34;
         if len(children) &gt; 0:
             for child_id in children:
                 child = self.data.entries()[child_id]
@@ -380,10 +445,16 @@ class graph_representation:
                 self.focus_children(self.data.get_children(child), value)
 
     def focus_parents(self, person, current_focus):
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;
             Change focus value of ascendants to the proper value.
             Then the same to ascendants&#39;s ascendants and so on.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *person* -- person whose parents we want to focus.
+
+        *current_focus* -- current focus value to pass on ascendants.
+        &#34;&#34;&#34;
         if person.origin is not None:
             bloodline = self.data.entries()[person.origin]
             right_side = self.data.entries()[bloodline.head]
@@ -397,10 +468,16 @@ class graph_representation:
             self.focus_parents(left_side, current_focus)
 
     def select_node(self, idn, deselect=False):
-        &#39;&#39;&#39;
-            Focuses on node changing it&#39;s color.
+        &#34;&#34;&#34;
+            Change node&#39;s color.
             Colors straight line ascendants and descendants.
-        &#39;&#39;&#39;
+
+        Arguments:
+
+        *idn* -- person who focus and select values we are changing.
+
+        *deselect* -- if `True` clears select and focus values.
+        &#34;&#34;&#34;
         selected = self.data.entries()[idn]
         if not deselect:
             selected.focus = 0
@@ -412,21 +489,16 @@ class graph_representation:
             selected.select = False
             self.focus_children(self.data.get_children(selected), -1)
             self.focus_parents(selected, -1)
-        # self.data.entries()[idn] = selected
 
     def deselect(self):
-        &#39;&#39;&#39;
-            Clears focus value.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Set all nodes&#39; color to default.&#34;&#34;&#34;
         for entry in self.data.entries().values():
-            if isinstance(entry, p) and entry.select:
+            if isinstance(entry, Person) and entry.select:
                 self.select_node(entry.idn, deselect=True)
                 break
 
     def get_mark_direction(self, person):
-        &#39;&#39;&#39;
-            Checks person&#39;s position to the selected node.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Check person&#39;s position to the selected node.&#34;&#34;&#34;
         children = self.data.get_children(person)
         if len(children) == 0:
             return (&#39;R&#39;, &#39;?&#39;, &#39;?&#39;)
@@ -442,9 +514,7 @@ class graph_representation:
         return (&#39;?&#39;, &#39;?&#39;, &#39;?&#39;)
 
     def tuples_to_list(tuples_to_sort, siblings):
-        &#39;&#39;&#39;
-            Takes tuples of 3 and 5 and changes them to the list.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Take tuples of 3 and 5 and changes them to the list.&#34;&#34;&#34;
         result = []
         for tup in tuples_to_sort:
             lst = siblings.get(tup[2], [])
@@ -459,17 +529,68 @@ class graph_representation:
             result += sibs_id_list
         return result
 
-    # takes set of ids returns tuple(A,
-    # A - Right_side siblings, with selected F on last place
+    def get_pos_row_partners(self, pid, row):
+        &#34;&#34;&#34;Return position of person, and partners.&#34;&#34;&#34;
+        partn_list = []
+        sp_pos = &#39;R&#39;
+        selected_person = self.data.entries()[pid]
+        if selected_person.family_connections is not None:
+            any_fc_id = selected_person.family_connections[0]
+            any_fc = self.data.entries()[any_fc_id]
+            if any_fc.partner == pid:
+                sp_pos = &#39;L&#39;
+            for fc in selected_person.family_connections:
+                if sp_pos == &#39;R&#39;:
+                    partn_list += [fc.partner]
+                    row.remove(fc.partner)
+                else:
+                    partn_list += [fc.head]
+                    row.remove(fc.head)
+        return (sp_pos, row, partn_list)
+
+    def get_siblings(self, selected_person_idn, row):
+        &#34;&#34;&#34;Return siblings of person, and the rest of the row.&#34;&#34;&#34;
+        sibs = []
+        selected_person = self.data.entries()[selected_person_idn]
+        if selected_person.origin is not None:
+            sp_fam = self.data.entries()[selected_person.origin]
+            for p_id in row:
+                if self.data.entries()[p_id].origin == sp_fam:
+                    sibs += [p_id]
+            row -= sibs
+        return (sibs, row)
+
+    def sort_selected_row(self, selected_person_idn):
+        &#34;&#34;&#34;Sort the row in which, there is the selected person&#34;&#34;&#34;
+        self.current_level -= selected_person_idn
+        rest = list(self.current_level)
+        (rest, ssibs) = self.get_siblings(selected_person_idn, rest)
+        (pos, rest, par) = self.get_pos_row_partners(selected_person_idn, rest)
+        result = []
+        if pos == &#39;R&#39;:
+            r = list(map(lambda x: [self.data.get_partners(x)]+[x], ssibs))
+
+        else:
+            r = list(map(lambda x: [x]+[self.data.get_partners(x)], ssibs))
+        result = (lambda l: [item for sublist in l for item in sublist])(r)
+        rest -= result
+        result += [selected_person_idn]
+        result += rest
+        return result
+
     def sort_current_level(self):
-        &#39;&#39;&#39;
-            Sorts current row of nodes to:
-            [SHS] SH SP [SPS]
-            SH - selected head node
-            SP - selected partner node
-            [Sx] - siblings of x
-        &#39;&#39;&#39;
-        # print(&#39;Start:&#39;, list(self.current_level))
+        &#34;&#34;&#34;
+            Sort current row of nodes to:
+
+            `[SHS] SH SP [SPS]`
+
+            `SH` -- selected head node.
+
+            `SP` -- selected partner node.
+
+            `[Sx]` -- siblings of x.
+        &#34;&#34;&#34;
+        was_selected_person_printed = self.selected
         (result, tuples_to_sort) = ([], [])
         siblings = {}  # famid -&gt; list[id]
         for p_id in list(self.current_level):
@@ -479,8 +600,7 @@ class graph_representation:
             elif person.focus == -1:
                 sibs = siblings.get(person.origin, []) + [p_id]
                 siblings.update({person.origin: sibs})
-            elif not self.selected:
-                # get marked children and check what is the connection
+            elif not was_selected_person_printed:
                 pos, part, p_orig = self.get_mark_direction(person)
                 if (pos, part, person.origin) == (&#39;R&#39;, &#39;?&#39;, None):
                     if p_orig is not None:
@@ -502,37 +622,28 @@ class graph_representation:
             if person.select:
                 self.selected = True
         tups = sorted(tuples_to_sort, key=lambda t: t[1])
-        result += graph_representation.tuples_to_list(tups, siblings)
+        result += GraphRepresentation.tuples_to_list(tups, siblings)
         self.current_level = result
 
     def draw_level_return_next(self):
-        &#39;&#39;&#39;
-            Draws current row of nodes.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw current row of nodes.&#34;&#34;&#34;
         next_lv = set()
-        # print(&#34;bef:&#34;, self.current_level)
         self.sort_current_level()
-        # print(&#34;aft:&#34;, self.current_level)
         for el_id in self.current_level:
             el = self.data.entries()[el_id]
             next_lv |= self.data.get_children(el)
             self.draw_node(el)
-        # print(&#39;next&#39;, next_lv)
         return next_lv
 
     def create_nodes(self):
-        &#39;&#39;&#39;
-            Creates nodes. Manages subtrees (rows).
-        &#39;&#39;&#39;
-        # TODO make sure the children are under their parents
-        # maybe change set to list or something
-        # print(&#34;Current lv:&#34; + str(self.current_level))
+        &#34;&#34;&#34;
+            Create nodes. Manage subtrees (rows).
+        &#34;&#34;&#34;
         next_level = set()
         originless = self.get_current_level_originless_partners()
         self.current_level |= originless
         self.subtree = Tree()
         self.subtree.attr(rank=&#39;same&#39;, ordering=&#39;out&#39;)
-        self.selected = False
         next_level = self.draw_level_return_next()
         self.tree.subgraph(self.subtree)
         if len(next_level) != 0:
@@ -540,67 +651,53 @@ class graph_representation:
             self.create_nodes()
 
     def create_connections(self):
-        &#39;&#39;&#39;
-        Draws edges.
-        &#39;&#39;&#39;
+        &#34;&#34;&#34;Draw edges.&#34;&#34;&#34;
         for entry in self.data.entries().values():
-            if isinstance(entry, f):
-                # print(entry.idn)
+            if isinstance(entry, Family):
                 self.tree.edge(entry.head, entry.idn, arrowhead=&#34;none&#34;)
                 self.tree.edge(entry.idn, entry.partner, arrowhead=&#34;none&#34;)
                 if entry.family_connections is not None:
                     for c in entry.family_connections:
                         self.tree.edge(entry.idn, c)
 
-    def show(self):
-        &#39;&#39;&#39;
-        Main method to display proper tree.
-        &#39;&#39;&#39;
+    def show(self, just_show=False):
+        &#34;&#34;&#34;Display proper tree.
+           If `just_show` is `False` return the tree instead.
+        &#34;&#34;&#34;
         self.tree = Tree()
         self.current_level = self.data.find_top()
-        # sort by ranks
+        self.selected = False
         self.create_nodes()
         self.create_connections()
-        # print(self.data.next_indi_id)
 
-        # print(self.data.next_fam_id)
-        self.tree.view()</code></pre>
+        if just_show:
+            self.tree.view()
+        else:
+            return self.tree.render(format=&#39;jpeg&#39;)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="graph.graph_representation.node_color"><code class="name">var <span class="ident">node_color</span></code></dt>
+<dt id="graph.GraphRepresentation.NODE_COLOR"><code class="name">var <span class="ident">NODE_COLOR</span></code></dt>
 <dd>
-<section class="desc"><p>dict() -&gt; new empty dictionary
-dict(mapping) -&gt; new dictionary initialized from a mapping object's
-(key, value) pairs
-dict(iterable) -&gt; new dictionary initialized as if via:
-d = {}
-for k, v in iterable:
-d[k] = v
-dict(**kwargs) -&gt; new dictionary initialized with the name=value pairs
-in the keyword argument list.
-For example:
-dict(one=1, two=2)</p></section>
+<section class="desc"><p>Map program's description of node's color representation
+to proper color.</p></section>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="graph.graph_representation.create_connections"><code class="name flex">
+<dt id="graph.GraphRepresentation.create_connections"><code class="name flex">
 <span>def <span class="ident">create_connections</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Draws edges.</p></section>
+<section class="desc"><p>Draw edges.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create_connections(self):
-    &#39;&#39;&#39;
-    Draws edges.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Draw edges.&#34;&#34;&#34;
     for entry in self.data.entries().values():
-        if isinstance(entry, f):
-            # print(entry.idn)
+        if isinstance(entry, Family):
             self.tree.edge(entry.head, entry.idn, arrowhead=&#34;none&#34;)
             self.tree.edge(entry.idn, entry.partner, arrowhead=&#34;none&#34;)
             if entry.family_connections is not None:
@@ -608,28 +705,24 @@ dict(one=1, two=2)</p></section>
                     self.tree.edge(entry.idn, c)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.create_nodes"><code class="name flex">
+<dt id="graph.GraphRepresentation.create_nodes"><code class="name flex">
 <span>def <span class="ident">create_nodes</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Creates nodes. Manages subtrees (rows).</p></section>
+<section class="desc"><p>Create nodes. Manage subtrees (rows).</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create_nodes(self):
-    &#39;&#39;&#39;
-        Creates nodes. Manages subtrees (rows).
-    &#39;&#39;&#39;
-    # TODO make sure the children are under their parents
-    # maybe change set to list or something
-    # print(&#34;Current lv:&#34; + str(self.current_level))
+    &#34;&#34;&#34;
+        Create nodes. Manage subtrees (rows).
+    &#34;&#34;&#34;
     next_level = set()
     originless = self.get_current_level_originless_partners()
     self.current_level |= originless
     self.subtree = Tree()
     self.subtree.attr(rank=&#39;same&#39;, ordering=&#39;out&#39;)
-    self.selected = False
     next_level = self.draw_level_return_next()
     self.tree.subgraph(self.subtree)
     if len(next_level) != 0:
@@ -637,91 +730,96 @@ dict(one=1, two=2)</p></section>
         self.create_nodes()</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.deselect"><code class="name flex">
+<dt id="graph.GraphRepresentation.deselect"><code class="name flex">
 <span>def <span class="ident">deselect</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Clears focus value.</p></section>
+<section class="desc"><p>Set all nodes' color to default.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def deselect(self):
-    &#39;&#39;&#39;
-        Clears focus value.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Set all nodes&#39; color to default.&#34;&#34;&#34;
     for entry in self.data.entries().values():
-        if isinstance(entry, p) and entry.select:
+        if isinstance(entry, Person) and entry.select:
             self.select_node(entry.idn, deselect=True)
             break</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.draw_level_return_next"><code class="name flex">
+<dt id="graph.GraphRepresentation.draw_level_return_next"><code class="name flex">
 <span>def <span class="ident">draw_level_return_next</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Draws current row of nodes.</p></section>
+<section class="desc"><p>Draw current row of nodes.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw_level_return_next(self):
-    &#39;&#39;&#39;
-        Draws current row of nodes.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Draw current row of nodes.&#34;&#34;&#34;
     next_lv = set()
-    # print(&#34;bef:&#34;, self.current_level)
     self.sort_current_level()
-    # print(&#34;aft:&#34;, self.current_level)
     for el_id in self.current_level:
         el = self.data.entries()[el_id]
         next_lv |= self.data.get_children(el)
         self.draw_node(el)
-    # print(&#39;next&#39;, next_lv)
     return next_lv</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.draw_node"><code class="name flex">
+<dt id="graph.GraphRepresentation.draw_node"><code class="name flex">
 <span>def <span class="ident">draw_node</span></span>(<span>self, el)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Draws node from person class element. Also draws family node.</p></section>
+<section class="desc"><p>Draw node from person class element and it's family node if exists.</p>
+<p>Argument:</p>
+<p><em>el</em> &ndash; element which node will be drawn</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw_node(self, el):
-    &#39;&#39;&#39;
-        Draws node from person class element. Also draws family node.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Draw node from person class element and it&#39;s family node if exists.
+
+    Argument:
+
+    *el* -- element which node will be drawn
+    &#34;&#34;&#34;
     s = &#39;filled&#39;
-    # if they have a family
     if el.family_connections is not None:
         for fam_idn in el.family_connections:
-            # family nodes are drawn twice!!! TODO
             self.subtree.node(fam_idn, shape=&#34;point&#34;)
-            c = graph_representation.get_color(el.focus, el.select)
+            c = GraphRepresentation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
     else:
-        c = graph_representation.get_color(el.focus, el.select)
+        c = GraphRepresentation.get_color(el.focus, el.select)
         self.subtree.node(el.idn, el.clean_display(), style=s, color=c)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.focus_children"><code class="name flex">
+<dt id="graph.GraphRepresentation.focus_children"><code class="name flex">
 <span>def <span class="ident">focus_children</span></span>(<span>self, children, value=0)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Change focus value of children to the given value.
-Then the same to children's children and so on.</p></section>
+Then the same to children's children and so on.</p>
+<p>Arguments:</p>
+<p><em>children</em> &ndash; set of children to focus on.</p>
+<p><em>value</em> &ndash; optional value to change children value.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def focus_children(self, children, value=0):
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
         Change focus value of children to the given value.
         Then the same to children&#39;s children and so on.
-    &#39;&#39;&#39;
+
+    Arguments:
+
+    *children* -- set of children to focus on.
+
+    *value* -- optional value to change children value.
+    &#34;&#34;&#34;
     if len(children) &gt; 0:
         for child_id in children:
             child = self.data.entries()[child_id]
@@ -729,21 +827,30 @@ Then the same to children's children and so on.</p></section>
             self.focus_children(self.data.get_children(child), value)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.focus_parents"><code class="name flex">
+<dt id="graph.GraphRepresentation.focus_parents"><code class="name flex">
 <span>def <span class="ident">focus_parents</span></span>(<span>self, person, current_focus)</span>
 </code></dt>
 <dd>
 <section class="desc"><p>Change focus value of ascendants to the proper value.
-Then the same to ascendants's ascendants and so on.</p></section>
+Then the same to ascendants's ascendants and so on.</p>
+<p>Arguments:</p>
+<p><em>person</em> &ndash; person whose parents we want to focus.</p>
+<p><em>current_focus</em> &ndash; current focus value to pass on ascendants.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def focus_parents(self, person, current_focus):
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;
         Change focus value of ascendants to the proper value.
         Then the same to ascendants&#39;s ascendants and so on.
-    &#39;&#39;&#39;
+
+    Arguments:
+
+    *person* -- person whose parents we want to focus.
+
+    *current_focus* -- current focus value to pass on ascendants.
+    &#34;&#34;&#34;
     if person.origin is not None:
         bloodline = self.data.entries()[person.origin]
         right_side = self.data.entries()[bloodline.head]
@@ -757,39 +864,35 @@ Then the same to ascendants's ascendants and so on.</p></section>
         self.focus_parents(left_side, current_focus)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.get_color"><code class="name flex">
+<dt id="graph.GraphRepresentation.get_color"><code class="name flex">
 <span>def <span class="ident">get_color</span></span>(<span>focus, selected)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Maps focus integer from person to color</p></section>
+<section class="desc"><p>Map focus integer from person to color.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_color(focus, selected):
-    &#39;&#39;&#39;
-        Maps focus integer from person to color
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Map focus integer from person to color.&#34;&#34;&#34;
     if selected:
-        return graph_representation.node_color[&#39;selected&#39;]
+        return GraphRepresentation.NODE_COLOR[&#39;selected&#39;]
     if focus &gt;= 0:
-        return graph_representation.node_color[&#39;focused&#39;]
-    return graph_representation.node_color[&#39;default&#39;]</code></pre>
+        return GraphRepresentation.NODE_COLOR[&#39;focused&#39;]
+    return GraphRepresentation.NODE_COLOR[&#39;default&#39;]</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.get_current_level_originless_partners"><code class="name flex">
+<dt id="graph.GraphRepresentation.get_current_level_originless_partners"><code class="name flex">
 <span>def <span class="ident">get_current_level_originless_partners</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Returns set of people who do not have origin family specified.</p></section>
+<section class="desc"><p>Return set of people who do not have origin family specified.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_current_level_originless_partners(self):
-    &#39;&#39;&#39;
-        Returns set of people who do not have origin family specified.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Return set of people who do not have origin family specified.&#34;&#34;&#34;
     result = set()
     for p_id in self.current_level:
         originless_partners = self.data.get_originless_partners(p_id)
@@ -797,19 +900,17 @@ Then the same to ascendants's ascendants and so on.</p></section>
     return result</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.get_mark_direction"><code class="name flex">
+<dt id="graph.GraphRepresentation.get_mark_direction"><code class="name flex">
 <span>def <span class="ident">get_mark_direction</span></span>(<span>self, person)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Checks person's position to the selected node.</p></section>
+<section class="desc"><p>Check person's position to the selected node.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_mark_direction(self, person):
-    &#39;&#39;&#39;
-        Checks person&#39;s position to the selected node.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Check person&#39;s position to the selected node.&#34;&#34;&#34;
     children = self.data.get_children(person)
     if len(children) == 0:
         return (&#39;R&#39;, &#39;?&#39;, &#39;?&#39;)
@@ -825,21 +926,81 @@ Then the same to ascendants's ascendants and so on.</p></section>
     return (&#39;?&#39;, &#39;?&#39;, &#39;?&#39;)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.select_node"><code class="name flex">
+<dt id="graph.GraphRepresentation.get_pos_row_partners"><code class="name flex">
+<span>def <span class="ident">get_pos_row_partners</span></span>(<span>self, pid, row)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return position of person, and partners.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_pos_row_partners(self, pid, row):
+    &#34;&#34;&#34;Return position of person, and partners.&#34;&#34;&#34;
+    partn_list = []
+    sp_pos = &#39;R&#39;
+    selected_person = self.data.entries()[pid]
+    if selected_person.family_connections is not None:
+        any_fc_id = selected_person.family_connections[0]
+        any_fc = self.data.entries()[any_fc_id]
+        if any_fc.partner == pid:
+            sp_pos = &#39;L&#39;
+        for fc in selected_person.family_connections:
+            if sp_pos == &#39;R&#39;:
+                partn_list += [fc.partner]
+                row.remove(fc.partner)
+            else:
+                partn_list += [fc.head]
+                row.remove(fc.head)
+    return (sp_pos, row, partn_list)</code></pre>
+</details>
+</dd>
+<dt id="graph.GraphRepresentation.get_siblings"><code class="name flex">
+<span>def <span class="ident">get_siblings</span></span>(<span>self, selected_person_idn, row)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Return siblings of person, and the rest of the row.</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_siblings(self, selected_person_idn, row):
+    &#34;&#34;&#34;Return siblings of person, and the rest of the row.&#34;&#34;&#34;
+    sibs = []
+    selected_person = self.data.entries()[selected_person_idn]
+    if selected_person.origin is not None:
+        sp_fam = self.data.entries()[selected_person.origin]
+        for p_id in row:
+            if self.data.entries()[p_id].origin == sp_fam:
+                sibs += [p_id]
+        row -= sibs
+    return (sibs, row)</code></pre>
+</details>
+</dd>
+<dt id="graph.GraphRepresentation.select_node"><code class="name flex">
 <span>def <span class="ident">select_node</span></span>(<span>self, idn, deselect=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Focuses on node changing it's color.
-Colors straight line ascendants and descendants.</p></section>
+<section class="desc"><p>Change node's color.
+Colors straight line ascendants and descendants.</p>
+<p>Arguments:</p>
+<p><em>idn</em> &ndash; person who focus and select values we are changing.</p>
+<p><em>deselect</em> &ndash; if <code>True</code> clears select and focus values.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def select_node(self, idn, deselect=False):
-    &#39;&#39;&#39;
-        Focuses on node changing it&#39;s color.
+    &#34;&#34;&#34;
+        Change node&#39;s color.
         Colors straight line ascendants and descendants.
-    &#39;&#39;&#39;
+
+    Arguments:
+
+    *idn* -- person who focus and select values we are changing.
+
+    *deselect* -- if `True` clears select and focus values.
+    &#34;&#34;&#34;
     selected = self.data.entries()[idn]
     if not deselect:
         selected.focus = 0
@@ -853,7 +1014,7 @@ Colors straight line ascendants and descendants.</p></section>
         self.focus_parents(selected, -1)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.send_data"><code class="name flex">
+<dt id="graph.GraphRepresentation.send_data"><code class="name flex">
 <span>def <span class="ident">send_data</span></span>(<span>self, data)</span>
 </code></dt>
 <dd>
@@ -866,52 +1027,58 @@ Colors straight line ascendants and descendants.</p></section>
     self.data = data</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.show"><code class="name flex">
-<span>def <span class="ident">show</span></span>(<span>self)</span>
+<dt id="graph.GraphRepresentation.show"><code class="name flex">
+<span>def <span class="ident">show</span></span>(<span>self, just_show=False)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Main method to display proper tree.</p></section>
+<section class="desc"><p>Display proper tree.
+If <code>just_show</code> is <code>False</code> return the tree instead.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def show(self):
-    &#39;&#39;&#39;
-    Main method to display proper tree.
-    &#39;&#39;&#39;
+<pre><code class="python">def show(self, just_show=False):
+    &#34;&#34;&#34;Display proper tree.
+       If `just_show` is `False` return the tree instead.
+    &#34;&#34;&#34;
     self.tree = Tree()
     self.current_level = self.data.find_top()
-    # sort by ranks
+    self.selected = False
     self.create_nodes()
     self.create_connections()
-    # print(self.data.next_indi_id)
 
-    # print(self.data.next_fam_id)
-    self.tree.view()</code></pre>
+    if just_show:
+        self.tree.view()
+    else:
+        return self.tree.render(format=&#39;jpeg&#39;)</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.sort_current_level"><code class="name flex">
+<dt id="graph.GraphRepresentation.sort_current_level"><code class="name flex">
 <span>def <span class="ident">sort_current_level</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Sorts current row of nodes to:
-[SHS] SH SP [SPS]
-SH - selected head node
-SP - selected partner node
-[Sx] - siblings of x</p></section>
+<section class="desc"><p>Sort current row of nodes to:</p>
+<p><code>[SHS] SH SP [SPS]</code></p>
+<p><code>SH</code> &ndash; selected head node.</p>
+<p><code>SP</code> &ndash; selected partner node.</p>
+<p><code>[Sx]</code> &ndash; siblings of x.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def sort_current_level(self):
-    &#39;&#39;&#39;
-        Sorts current row of nodes to:
-        [SHS] SH SP [SPS]
-        SH - selected head node
-        SP - selected partner node
-        [Sx] - siblings of x
-    &#39;&#39;&#39;
-    # print(&#39;Start:&#39;, list(self.current_level))
+    &#34;&#34;&#34;
+        Sort current row of nodes to:
+
+        `[SHS] SH SP [SPS]`
+
+        `SH` -- selected head node.
+
+        `SP` -- selected partner node.
+
+        `[Sx]` -- siblings of x.
+    &#34;&#34;&#34;
+    was_selected_person_printed = self.selected
     (result, tuples_to_sort) = ([], [])
     siblings = {}  # famid -&gt; list[id]
     for p_id in list(self.current_level):
@@ -921,8 +1088,7 @@ SP - selected partner node
         elif person.focus == -1:
             sibs = siblings.get(person.origin, []) + [p_id]
             siblings.update({person.origin: sibs})
-        elif not self.selected:
-            # get marked children and check what is the connection
+        elif not was_selected_person_printed:
             pos, part, p_orig = self.get_mark_direction(person)
             if (pos, part, person.origin) == (&#39;R&#39;, &#39;?&#39;, None):
                 if p_orig is not None:
@@ -944,23 +1110,49 @@ SP - selected partner node
         if person.select:
             self.selected = True
     tups = sorted(tuples_to_sort, key=lambda t: t[1])
-    result += graph_representation.tuples_to_list(tups, siblings)
+    result += GraphRepresentation.tuples_to_list(tups, siblings)
     self.current_level = result</code></pre>
 </details>
 </dd>
-<dt id="graph.graph_representation.tuples_to_list"><code class="name flex">
+<dt id="graph.GraphRepresentation.sort_selected_row"><code class="name flex">
+<span>def <span class="ident">sort_selected_row</span></span>(<span>self, selected_person_idn)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Sort the row in which, there is the selected person</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sort_selected_row(self, selected_person_idn):
+    &#34;&#34;&#34;Sort the row in which, there is the selected person&#34;&#34;&#34;
+    self.current_level -= selected_person_idn
+    rest = list(self.current_level)
+    (rest, ssibs) = self.get_siblings(selected_person_idn, rest)
+    (pos, rest, par) = self.get_pos_row_partners(selected_person_idn, rest)
+    result = []
+    if pos == &#39;R&#39;:
+        r = list(map(lambda x: [self.data.get_partners(x)]+[x], ssibs))
+
+    else:
+        r = list(map(lambda x: [x]+[self.data.get_partners(x)], ssibs))
+    result = (lambda l: [item for sublist in l for item in sublist])(r)
+    rest -= result
+    result += [selected_person_idn]
+    result += rest
+    return result</code></pre>
+</details>
+</dd>
+<dt id="graph.GraphRepresentation.tuples_to_list"><code class="name flex">
 <span>def <span class="ident">tuples_to_list</span></span>(<span>tuples_to_sort, siblings)</span>
 </code></dt>
 <dd>
-<section class="desc"><p>Takes tuples of 3 and 5 and changes them to the list.</p></section>
+<section class="desc"><p>Take tuples of 3 and 5 and changes them to the list.</p></section>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def tuples_to_list(tuples_to_sort, siblings):
-    &#39;&#39;&#39;
-        Takes tuples of 3 and 5 and changes them to the list.
-    &#39;&#39;&#39;
+    &#34;&#34;&#34;Take tuples of 3 and 5 and changes them to the list.&#34;&#34;&#34;
     result = []
     for tup in tuples_to_sort:
         lst = siblings.get(tup[2], [])
@@ -990,24 +1182,27 @@ SP - selected partner node
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="graph.graph_representation" href="#graph.graph_representation">graph_representation</a></code></h4>
+<h4><code><a title="graph.GraphRepresentation" href="#graph.GraphRepresentation">GraphRepresentation</a></code></h4>
 <ul class="">
-<li><code><a title="graph.graph_representation.create_connections" href="#graph.graph_representation.create_connections">create_connections</a></code></li>
-<li><code><a title="graph.graph_representation.create_nodes" href="#graph.graph_representation.create_nodes">create_nodes</a></code></li>
-<li><code><a title="graph.graph_representation.deselect" href="#graph.graph_representation.deselect">deselect</a></code></li>
-<li><code><a title="graph.graph_representation.draw_level_return_next" href="#graph.graph_representation.draw_level_return_next">draw_level_return_next</a></code></li>
-<li><code><a title="graph.graph_representation.draw_node" href="#graph.graph_representation.draw_node">draw_node</a></code></li>
-<li><code><a title="graph.graph_representation.focus_children" href="#graph.graph_representation.focus_children">focus_children</a></code></li>
-<li><code><a title="graph.graph_representation.focus_parents" href="#graph.graph_representation.focus_parents">focus_parents</a></code></li>
-<li><code><a title="graph.graph_representation.get_color" href="#graph.graph_representation.get_color">get_color</a></code></li>
-<li><code><a title="graph.graph_representation.get_current_level_originless_partners" href="#graph.graph_representation.get_current_level_originless_partners">get_current_level_originless_partners</a></code></li>
-<li><code><a title="graph.graph_representation.get_mark_direction" href="#graph.graph_representation.get_mark_direction">get_mark_direction</a></code></li>
-<li><code><a title="graph.graph_representation.node_color" href="#graph.graph_representation.node_color">node_color</a></code></li>
-<li><code><a title="graph.graph_representation.select_node" href="#graph.graph_representation.select_node">select_node</a></code></li>
-<li><code><a title="graph.graph_representation.send_data" href="#graph.graph_representation.send_data">send_data</a></code></li>
-<li><code><a title="graph.graph_representation.show" href="#graph.graph_representation.show">show</a></code></li>
-<li><code><a title="graph.graph_representation.sort_current_level" href="#graph.graph_representation.sort_current_level">sort_current_level</a></code></li>
-<li><code><a title="graph.graph_representation.tuples_to_list" href="#graph.graph_representation.tuples_to_list">tuples_to_list</a></code></li>
+<li><code><a title="graph.GraphRepresentation.NODE_COLOR" href="#graph.GraphRepresentation.NODE_COLOR">NODE_COLOR</a></code></li>
+<li><code><a title="graph.GraphRepresentation.create_connections" href="#graph.GraphRepresentation.create_connections">create_connections</a></code></li>
+<li><code><a title="graph.GraphRepresentation.create_nodes" href="#graph.GraphRepresentation.create_nodes">create_nodes</a></code></li>
+<li><code><a title="graph.GraphRepresentation.deselect" href="#graph.GraphRepresentation.deselect">deselect</a></code></li>
+<li><code><a title="graph.GraphRepresentation.draw_level_return_next" href="#graph.GraphRepresentation.draw_level_return_next">draw_level_return_next</a></code></li>
+<li><code><a title="graph.GraphRepresentation.draw_node" href="#graph.GraphRepresentation.draw_node">draw_node</a></code></li>
+<li><code><a title="graph.GraphRepresentation.focus_children" href="#graph.GraphRepresentation.focus_children">focus_children</a></code></li>
+<li><code><a title="graph.GraphRepresentation.focus_parents" href="#graph.GraphRepresentation.focus_parents">focus_parents</a></code></li>
+<li><code><a title="graph.GraphRepresentation.get_color" href="#graph.GraphRepresentation.get_color">get_color</a></code></li>
+<li><code><a title="graph.GraphRepresentation.get_current_level_originless_partners" href="#graph.GraphRepresentation.get_current_level_originless_partners">get_current_level_originless_partners</a></code></li>
+<li><code><a title="graph.GraphRepresentation.get_mark_direction" href="#graph.GraphRepresentation.get_mark_direction">get_mark_direction</a></code></li>
+<li><code><a title="graph.GraphRepresentation.get_pos_row_partners" href="#graph.GraphRepresentation.get_pos_row_partners">get_pos_row_partners</a></code></li>
+<li><code><a title="graph.GraphRepresentation.get_siblings" href="#graph.GraphRepresentation.get_siblings">get_siblings</a></code></li>
+<li><code><a title="graph.GraphRepresentation.select_node" href="#graph.GraphRepresentation.select_node">select_node</a></code></li>
+<li><code><a title="graph.GraphRepresentation.send_data" href="#graph.GraphRepresentation.send_data">send_data</a></code></li>
+<li><code><a title="graph.GraphRepresentation.show" href="#graph.GraphRepresentation.show">show</a></code></li>
+<li><code><a title="graph.GraphRepresentation.sort_current_level" href="#graph.GraphRepresentation.sort_current_level">sort_current_level</a></code></li>
+<li><code><a title="graph.GraphRepresentation.sort_selected_row" href="#graph.GraphRepresentation.sort_selected_row">sort_selected_row</a></code></li>
+<li><code><a title="graph.GraphRepresentation.tuples_to_list" href="#graph.GraphRepresentation.tuples_to_list">tuples_to_list</a></code></li>
 </ul>
 </li>
 </ul>

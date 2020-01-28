@@ -1,7 +1,7 @@
-from entry import Entry as ent
+from entry import Entry
 
 
-class Family(ent):
+class Family(Entry):
 
     def __init__(self, idn=None, head=None, part=None, rel=None):
         self.idn = idn  # string(idn)
@@ -13,7 +13,7 @@ class Family(ent):
     def getId(self):
         return self.idn
 
-    def updateData(self, data, new_value):
+    def update_data(self, data, new_value):
         if data == "head":
             self.head = new_value
         elif data == "partner":
