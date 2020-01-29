@@ -1,3 +1,8 @@
+"""
+    Gedcom exporter module.
+
+    Is responsible for exporting environment as gedcom file.
+"""
 from person import Person
 from family import Family
 from functools import reduce

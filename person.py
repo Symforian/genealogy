@@ -1,3 +1,9 @@
+"""
+    Environment's entry model, person.
+
+    Is responsible for storing person's data
+    and changing the form of displaying it.
+"""
 from entry import Entry
 
 

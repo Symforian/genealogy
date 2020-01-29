@@ -1,3 +1,9 @@
+"""
+    Environment's entry model, family.
+
+    Is responsible for storing family's data
+    and changing the form of displaying it.
+"""
 from entry import Entry
 
 

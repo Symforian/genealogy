@@ -1,3 +1,8 @@
+"""
+    Pop up window's module.
+
+    Is responsible for creating and managing pop up windows.
+"""
 from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QFormLayout,
                              QGroupBox, QLabel, QLineEdit, QListWidget,
                              QVBoxLayout, QCheckBox, QComboBox, QErrorMessage)

@@ -1,3 +1,8 @@
+"""
+    Gedcom parser, importer module.
+
+    Is responsible for importing gedcom file and parsing it for program's use.
+"""
 from tree_env import Env
 from person import Person
 from family import Family

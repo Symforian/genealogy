@@ -46,7 +46,6 @@ class AppWindow(QMainWindow):
 
     def update_imgbox(self, name):
         """Load new img in the tree place."""
-        print(name)
         self.pixmap = QPixmap(name)
         self.imgbox.setPixmap(self.pixmap)
         self.resize(self.pixmap.width(), self.pixmap.height())

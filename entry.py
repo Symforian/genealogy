@@ -1,3 +1,8 @@
+"""
+    Environment's entry model.
+"""
+
+
 class Entry:
 
     def get_idn(self):

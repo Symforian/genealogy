@@ -1,6 +1,10 @@
-# libs: Matplotlib, PyQt, Seaborn, Pandas
-# graphviz? sklearn overleap?
-# to check ^
+"""
+    Command line interface module.
+
+    Is responsible for running program in command line only.
+
+    For debugging purposes.
+"""
 from gedcom_parser import GedcomParser as GP
 from gedcom_exporter import GedcomExporter as GE
 from graph import GraphRepresentation as GR
