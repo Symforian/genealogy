@@ -10,6 +10,7 @@ from entry import Entry
 class Family(Entry):
 
     def __init__(self, idn=None, head=None, part=None, rel=None):
+        super().__init__()
         self.idn = idn  # string(idn)
         self.head = head  # string (idn)
         self.partner = part  # string(idn)

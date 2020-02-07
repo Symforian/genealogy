@@ -90,6 +90,49 @@ class test_find_top(TestCase):
         self.assertEqual(e.find_top(), {p1.idn, p2.idn})
 
 
+class test_get_partners(TestCase):
+
+    def test_no_partners(self):
+        p1 = mock.create_autospec(Person, idn='I1', family_connections=None)
+        e = Env({p1.idn: p1})
+        self.assertEqual(e.get_partners(p1.idn), None)
+
+    def test_one_partner_on_right_side(self):
+        p1 = mock.create_autospec(Person, idn='I1', family_connections=['F1'])
+        p2 = mock.create_autospec(Person, idn='I2', family_connections=['F1'])
+        f2 = mock.create_autospec(Family, idn='F1', head='I1', partner='I2')
+        e = Env({p1.idn: p1, p2.idn: p2, f2.idn: f2})
+        self.assertEqual(e.get_partners(p1.idn), {p2.idn})
+
+    def test_one_partner_on_left_side(self):
+        p1 = mock.create_autospec(Person, idn='I1', family_connections=['F1'])
+        p2 = mock.create_autospec(Person, idn='I2', family_connections=['F1'])
+        f1 = mock.create_autospec(Family, idn='F1', head='I1', partner='I2')
+        e = Env({p1.idn: p1, p2.idn: p2, f1.idn: f1})
+        self.assertEqual(e.get_partners(p2.idn), {p1.idn})
+
+    def test_more_partner_on_right_side(self):
+        p1 = mock.create_autospec(Person, idn='I1', family_connections=['F1', 'F2', 'F3'])
+        p2 = mock.create_autospec(Person, idn='I2', family_connections=['F1'])
+        p3 = mock.create_autospec(Person, idn='I3', family_connections=['F2'])
+        p4 = mock.create_autospec(Person, idn='I4', family_connections=['F3'])
+        f1 = mock.create_autospec(Family, idn='F1', head='I1', partner='I2')
+        f2 = mock.create_autospec(Family, idn='F2', head='I1', partner='I3')
+        f3 = mock.create_autospec(Family, idn='F3', head='I1', partner='I4')
+        e = Env({p1.idn: p1, p2.idn: p2, p3.idn: p3, p4.idn: p4, f1.idn: f1, f2.idn: f2, f3.idn: f3})
+        self.assertEqual(e.get_partners(p1.idn), {p2.idn, p3.idn, p4.idn})
+
+    def test_more_partner_on_left_side(self):
+        p1 = mock.create_autospec(Person, idn='I1', family_connections=['F1'])
+        p2 = mock.create_autospec(Person, idn='I2', family_connections=['F1', 'F2', 'F3'])
+        p3 = mock.create_autospec(Person, idn='I3', family_connections=['F2'])
+        p4 = mock.create_autospec(Person, idn='I4', family_connections=['F3'])
+        f1 = mock.create_autospec(Family, idn='F1', head='I1', partner='I2')
+        f2 = mock.create_autospec(Family, idn='F2', head='I3', partner='I2')
+        f3 = mock.create_autospec(Family, idn='F3', head='I4', partner='I2')
+        e = Env({p1.idn: p1, p2.idn: p2, p3.idn: p3, p4.idn: p4, f1.idn: f1, f2.idn: f2, f3.idn: f3})
+        self.assertEqual(e.get_partners(p2.idn), {p1.idn, p3.idn, p4.idn})
+
 class test_get_children(TestCase):
 
     def test_no_children(self):

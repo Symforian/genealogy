@@ -5,9 +5,9 @@
 
     For debugging purposes.
 """
-from gedcom_parser import GedcomParser as GP
-from gedcom_exporter import GedcomExporter as GE
-from graph import GraphRepresentation as GR
+from gedcom_parser import GedcomParser
+from gedcom_exporter import GedcomExporter
+from graph import GraphRepresentation
 from person import Person
 from family import Family
 
@@ -15,17 +15,17 @@ from family import Family
 class CommandLineInterface:
     def __init__(self):
         self.env = None
-        self.drawer = GR()
+        self.drawer = GraphRepresentation()
         self.running = True
 
     def import_gedcom(self):
-        parser = GP(input("Enter filename\n"))
+        parser = GedcomParser(input("Enter filename\n"))
         self.env = parser.parse()
 
     def export_gedcom(self):
         if self.env is not None:
             msg = "Enter filename\n"
-            GE(input(msg), self.env.entries()).export()
+            GedcomExporter(input(msg), self.env.entries()).export()
         else:
             print("No data to export\n")
 

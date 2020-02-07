@@ -5,6 +5,10 @@
 
 class Entry:
 
+    def __init__(self):
+        self.idn = None
+        self.family_connections = None
+
     def get_idn(self):
         return self.idn
 

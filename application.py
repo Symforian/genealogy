@@ -137,7 +137,7 @@ class AppWindow(QMainWindow):
             if pop.result() == pop.DialogCode.Accepted:
                 return (True, pop.get_result())
         print("Error no ppl to select from")
-        return (False, None)
+        return False, None
 
     def mod_person(self):
         """Modify person functionality `CTRL+M`."""
