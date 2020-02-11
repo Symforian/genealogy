@@ -41,9 +41,15 @@ class Person(Entry):
 
     def clean_display(self):
         ret = ""
-        for names in self.name:
-            ret += names + " "
-        ret += self.surname[0] + "\n"
+        if not self.name:
+            ret = "Unknown "
+        else:
+            for names in self.name:
+                ret += names + " "
+        if self.surname:
+            ret += self.surname[0] + "\n"
+        else:
+            ret += "Unknown\n"
         date = ""
         for i in self.birth:
             date += i + " "

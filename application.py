@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QWidget, QScrollArea)
 from PyQt5.QtGui import QPixmap
 from program import Program
-from pop_ups import PopUpForm as PUF, PopUpSelect as PUS
+from pop_ups import PopUpForm, PopUpSelect, PopUpError
 
 
 class AppWindow(QMainWindow):
@@ -58,11 +58,11 @@ class AppWindow(QMainWindow):
         self.statusbar.setObjectName("statusbar")
         self.setStatusBar(self.statusbar)
         fileMenu = mainMenu.addMenu('&File')
-        fileMenu = self.create_filemenu(fileMenu)
+        self.create_filemenu(fileMenu)
         editMenu = mainMenu.addMenu('&Edit')
-        editMenu = self.create_editmenu(editMenu)
+        self.create_editmenu(editMenu)
         focusMenu = mainMenu.addMenu('&Focus')
-        focusMenu = self.create_focusmenu(focusMenu)
+        self.create_focusmenu(focusMenu)
         self.setMenuBar(mainMenu)
 
     def create_filemenu(self, fileMenu):
@@ -123,7 +123,7 @@ class AppWindow(QMainWindow):
     def add_person(self):
         """Add person functionality `CTRL+A`."""
         origins = self.prog.get_ids_desc('family')
-        pop = PUF("Add person", origins)
+        pop = PopUpForm("Add person", origins)
         if pop.result() == pop.DialogCode.Accepted:
             (n, s, b, d, o) = pop.get_results()
             self.prog.add_entry(n, s, b, d, o)
@@ -132,11 +132,12 @@ class AppWindow(QMainWindow):
     def chose_person(self):
         """Open window to chose person."""
         people = self.prog.get_ids_desc('person')
-        if people != []:
-            pop = PUS(people)
+        if people:
+            pop = PopUpSelect(people)
             if pop.result() == pop.DialogCode.Accepted:
-                return (True, pop.get_result())
-        print("Error no ppl to select from")
+                return True, pop.get_result()
+        else:
+            PopUpError("No people to select from.")
         return False, None
 
     def mod_person(self):
@@ -145,7 +146,7 @@ class AppWindow(QMainWindow):
         if was_found:
             data = self.prog.get_person_data(results)
             ori = self.prog.get_ids_desc('family')
-            pop = PUF("Modify person", origins=ori, pdata=data)
+            pop = PopUpForm("Modify person", origins=ori, pdata=data)
             (n, s, b, d, o) = pop.get_results()
             self.prog.mod_entry(results, n, s, b, d, o)
             self.update_imgbox(self.prog.show())
@@ -173,13 +174,14 @@ class AppWindow(QMainWindow):
     def connect(self):
         """Connect people functionality `CTRL+C`."""
         (found_head, result_head) = self.chose_person()
-        (found_partner, result_partner) = self.chose_person()
-        if found_head and found_partner:
-            if result_head != result_partner:
-                self.prog.connect(result_head, result_partner)
-                self.update_imgbox(self.prog.show())
-            else:
-                print("Cannot connect to self")
+        if found_head:
+            (found_partner, result_partner) = self.chose_person()
+            if found_partner:
+                if result_head != result_partner:
+                    self.prog.connect(result_head, result_partner)
+                    self.update_imgbox(self.prog.show())
+                else:
+                    PopUpError("Cannot connect to a person to themself.")
 
 
 if __name__ == "__main__":

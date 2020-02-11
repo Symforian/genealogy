@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import (QDialog, QDialogButtonBox, QFormLayout,
 
 class PopUpError(QErrorMessage):
     def __init__(self, msg):
-        error_window = QErrorMessage()
-        error_window.showMessage(msg)
+        super().__init__()
+        self.showMessage(msg)
         self.show()
         self.exec_()
 
