@@ -52,7 +52,7 @@ numpy==1.17.2
 oauthlib==2.1.0
 olefile==0.46
 packaging==20.0
-paramiko==2.6.0
+paramiko==2.10.1
 pdoc3==0.7.4
 pexpect==4.6.0
 Pillow==6.1.0
