@@ -9,8 +9,9 @@ from entry import Entry
 
 class Person(Entry):
 
+    UNKNOWN = 'Unknown'
     # idn None = not yet assigned, other None = unknown
-    u = ['Unknown']
+    u = [UNKNOWN]
 
     def __init__(self, idn, name=u, sname=u, birt=u, deat=['']):
         self.depth = 0
@@ -42,14 +43,14 @@ class Person(Entry):
     def clean_display(self):
         ret = ""
         if not self.name:
-            ret = "Unknown "
+            ret = Person.UNKNOWN + " "
         else:
             for names in self.name:
                 ret += names + " "
         if self.surname:
             ret += self.surname[0] + "\n"
         else:
-            ret += "Unknown\n"
+            ret += Person.UNKNOWN + "\n"
         date = ""
         for i in self.birth:
             date += i + " "
@@ -62,8 +63,16 @@ class Person(Entry):
             ret += date[:-1]
         return ret
 
-    def desc(self):
-        temp = self.name[0] + " " + self.surname[0]
+    def description(self):
+        if(self.name):
+            temp = self.name[0]
+        else:
+            temp = Person.UNKNOWN
+        temp += " "
+        if(self.surname):
+            temp += self.surname[0]
+        else:
+            temp += Person.UNKNOWN
         # temp += "\nOrigin: "+str(self.origin)+"Born:"+str(self.birth)
         return temp  # +"\nDied: "+str(self.death)+"]\n"
 

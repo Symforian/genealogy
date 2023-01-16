@@ -62,7 +62,7 @@ class GedcomExporter:
         ent = 'INDI\n'
         ent += GedcomExporter.write_name(entry.name, entry.surname)
         ent += GedcomExporter.write_event(entry.birth, 'BIRT')
-        ent += GedcomExporter.write_event(entry.birth, 'DEAT')
+        ent += GedcomExporter.write_event(entry.death, 'DEAT')
         ent += GedcomExporter.write_origin(entry.origin)
         ent += GedcomExporter.write_families(entry.family_connections)
         return ent
@@ -101,7 +101,7 @@ class GedcomExporter:
         return data
 
     def export(self):
-        with open(self.filename+".GED", 'w+') as writer:
+        with open(self.filename, 'w+') as writer:
             writer.write(self.header())
             writer.write(self.write_data())
             writer.write(GedcomExporter.tail())

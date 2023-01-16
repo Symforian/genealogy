@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QWidget, QScrollArea)
 from PyQt5.QtGui import QPixmap
 from program import Program
-from pop_ups import PopUpForm, PopUpSelect, PopUpError
+from pop_ups import PopUpForm, PopUpSelect, PopUpError, PopUpYesNo
 
 
 class AppWindow(QMainWindow):
@@ -107,29 +107,32 @@ class AppWindow(QMainWindow):
 
     def file_new(self):
         """Clear program state."""
-        self.prog = Program()
+        pop = PopUpYesNo("Do you really want to close currently opened tree?\n")
+        if(pop.result() == pop.DialogCode.Accepted):
+            self.prog = Program()
+            self.update_imgbox(self.prog.show())
 
     def file_open(self):
         """Open new file and import to the program state."""
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
-        name = name[0][name[0].rfind('/')+1:-4]
-        self.prog.import_gedcom(name)
+        self.prog.import_gedcom(name[0])
         self.update_imgbox(self.prog.show())
 
     def file_export(self):
         """Export current program data to [temp] fixed filename."""
-        self.prog.export_gedcom("ExportedGedcomData")
+        filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', None, "GEDcom files (*.GED)")
+        self.prog.export_gedcom(filename[0])
 
     def add_person(self):
         """Add person functionality `CTRL+A`."""
         origins = self.prog.get_ids_desc('family')
         pop = PopUpForm("Add person", origins)
         if pop.result() == pop.DialogCode.Accepted:
-            (n, s, b, d, o) = pop.get_results()
-            self.prog.add_entry(n, s, b, d, o)
+            (name, surname, birth, death, origin) = pop.get_results()
+            self.prog.add_entry(name, surname, birth, death, origin)
             self.update_imgbox(self.prog.show())
 
-    def chose_person(self):
+    def choose_person(self):
         """Open window to chose person."""
         people = self.prog.get_ids_desc('person')
         if people:
@@ -142,25 +145,26 @@ class AppWindow(QMainWindow):
 
     def mod_person(self):
         """Modify person functionality `CTRL+M`."""
-        (was_found, results) = self.chose_person()
+        (was_found, results) = self.choose_person()
         if was_found:
             data = self.prog.get_person_data(results)
             ori = self.prog.get_ids_desc('family')
             pop = PopUpForm("Modify person", origins=ori, pdata=data)
-            (n, s, b, d, o) = pop.get_results()
-            self.prog.mod_entry(results, n, s, b, d, o)
-            self.update_imgbox(self.prog.show())
+            if pop.result() == pop.DialogCode.Accepted:
+                (name, surname, birth, death, origin) = pop.get_results()
+                self.prog.mod_entry(results, name, surname, birth, death, origin)
+                self.update_imgbox(self.prog.show())
 
     def rem_person(self):
         """Remove person functionality `CTRL+D`."""
-        (was_found, results) = self.chose_person()
+        (was_found, results) = self.choose_person()
         if was_found:
             self.prog.rem_entry(results)
             self.update_imgbox(self.prog.show())
 
     def sel_person(self):
         """Focus person functionality `CTRL+F`."""
-        (was_found, results) = self.chose_person()
+        (was_found, results) = self.choose_person()
         if was_found:
             self.prog.select(results)
             self.update_imgbox(self.prog.show())
@@ -173,9 +177,9 @@ class AppWindow(QMainWindow):
 
     def connect(self):
         """Connect people functionality `CTRL+C`."""
-        (found_head, result_head) = self.chose_person()
+        (found_head, result_head) = self.choose_person()
         if found_head:
-            (found_partner, result_partner) = self.chose_person()
+            (found_partner, result_partner) = self.choose_person()
             if found_partner:
                 if result_head != result_partner:
                     self.prog.connect(result_head, result_partner)

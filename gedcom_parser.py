@@ -126,7 +126,7 @@ class GedcomParser:
             return 0
 
     def parse(self):
-        with open(self.file + '.GED', 'r') as reader:
+        with open(self.file, 'r') as reader:
             line = reader.readline()
             while line != '':
                 # print(GedcomParser.parse_line(line), end='')

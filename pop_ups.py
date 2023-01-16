@@ -97,6 +97,20 @@ class PopUpForm(QDialog):
         else:
             check.setEnabled(True)
 
+class PopUpYesNo(QDialog):
+
+    def __init__(self, msg):
+        QDialog.__init__(self)
+        btnBox = QDialogButtonBox(QDialogButtonBox.Yes | QDialogButtonBox.No)
+        btnBox.accepted.connect(self.accept)
+        btnBox.rejected.connect(self.reject)
+        mainLayout = QVBoxLayout()
+        mainLayout.addWidget(QLabel(msg, self))
+        mainLayout.addWidget(btnBox)
+        self.setLayout(mainLayout)
+        self.setWindowTitle("Genealogy")
+        self.show()
+        self.exec_()
 
 class PopUpSelect(QDialog):
     NumGridRows = 3
@@ -106,8 +120,7 @@ class PopUpSelect(QDialog):
         QDialog.__init__(self)
         self.ppl = people
         self.create_form_group_box()
-        ok = QDialogButtonBox.Ok
-        btnBox = QDialogButtonBox(ok | QDialogButtonBox.Cancel)
+        btnBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         btnBox.accepted.connect(self.accept)
         btnBox.rejected.connect(self.reject)
         mainLayout = QVBoxLayout()
@@ -119,7 +132,7 @@ class PopUpSelect(QDialog):
         self.exec_()
 
     def create_form_group_box(self):
-        self.formGroupBox = QGroupBox("Chose person")
+        self.formGroupBox = QGroupBox("Choose person")
         layout = QFormLayout()
         self.cb = QComboBox()
         list_of_strings = list(map(lambda t: t[1], self.ppl))

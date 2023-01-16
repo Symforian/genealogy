@@ -113,8 +113,8 @@ class Env:
         ret = []
         for (k, v) in self.used_ids.items():
             if isinstance(v, Family):
-                desc = self.used_ids[v.head].desc() + '&'
-                desc += self.used_ids[v.partner].desc()
+                desc = self.used_ids[v.head].description() + '&'
+                desc += self.used_ids[v.partner].description()
                 i = int(k[1:])
                 ret += [(i, k, desc)]
         ret.sort(key=lambda tup: tup[0])
@@ -128,7 +128,7 @@ class Env:
         ret = []
         for (k, v) in self.used_ids.items():
             if isinstance(v, Person):
-                desc = v.desc()
+                desc = v.description()
                 i = int(k[1:])
                 ret += [(i, k, desc)]
         ret.sort(key=lambda tup: tup[0])
