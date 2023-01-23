@@ -25,9 +25,9 @@ class test_find_top(TestCase):
 
     def test_2_connected_people_env(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
-                                  family_connections=['F1'])
+                                  family_connections={'F1'})
         p2 = mock.create_autospec(Person, idn='I2', origin=None,
-                                  family_connections=['F1'])
+                                  family_connections={'F1'})
         f1 = mock.create_autospec(Family, idn='F1', head='I1',
                                   partner='I2')
         e = Env({p1.idn: p1, p2.idn: p2, f1.idn: f1})

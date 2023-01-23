@@ -56,8 +56,11 @@ class Program:
 
     def mod_entry(self, idn, name, surname, birth, death, origin):
         """Modify person entry in the environment."""
-        self.rem_entry(idn)
+        old_entry = self.env.entries()[idn]
+        fam_cons = old_entry.family_connections
+        self.env.entries().pop(idn)
         self.create_person_entry(idn, name, surname, birth, death, origin)
+        self.env.entries()[idn].family_connections = fam_cons
 
     def create_person_entry(self, idn, name, surname, birth, death, origin):
         """Create new person entry, and add to the environment."""
@@ -87,10 +90,10 @@ class Program:
                 self.env.entries()[child].origin = None
         head_fam_con = self.env.entries()[family.head].family_connections
         if head_fam_con is not None:
-            head_fam_con.remove(family_id)
+            head_fam_con.pop(family_id)
         partner_famcon = self.env.entries()[family.partner].family_connections
         if partner_famcon is not None:
-            partner_famcon.remove(family_id)
+            partner_famcon.pop(family_id)
         self.env.entries().pop(family_id)
 
     def get_person_data(self, person_id):

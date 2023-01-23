@@ -22,11 +22,11 @@ class Env:
         If `env` is `None`, the environment is empty.
         """
         if env is None:
-            self.used_ids = {}
+            self.id_entry_set = {}
             self.next_fam_id = 1
             self.next_indi_id = 1
         else:
-            self.used_ids = env
+            self.id_entry_set = env
 
     def generate_idn(self, id_type):
         """Generate a new identification number.
@@ -46,21 +46,21 @@ class Env:
 
     def add_entry(self, new_entry_id, new_entry_value):
         """Add entry to environment."""
-        self.used_ids[new_entry_id] = new_entry_value
+        self.id_entry_set[new_entry_id] = new_entry_value
 
     def entries(self):
         """Return environment as dictionary."""
-        return self.used_ids
+        return self.id_entry_set
 
     def get_partners(self, idn):
         """Return set of partners given person's identification number."""
-        person_fam_con_idns = self.used_ids[idn].family_connections
+        person_fam_con_idns = self.id_entry_set[idn].family_connections
         if person_fam_con_idns is None:
             return None
         else:
             ids = set()
             for person_fam_con_idn in person_fam_con_idns:
-                family = self.used_ids[person_fam_con_idn]
+                family = self.id_entry_set[person_fam_con_idn]
                 if family.head == idn:
                     ids.add(family.partner)
                 else:
@@ -73,7 +73,7 @@ class Env:
         result = set()
         if partners is not None:
             for partner_id in partners:
-                partner = self.used_ids[partner_id]
+                partner = self.id_entry_set[partner_id]
                 if partner.origin is None:
                     result.add(partner_id)
         return result
@@ -83,7 +83,7 @@ class Env:
         children = set()
         if el.family_connections is not None:
             for fam_idn in el.family_connections:
-                family = self.used_ids[fam_idn]
+                family = self.id_entry_set[fam_idn]
                 if family.family_connections is not None:
                     for child in family.family_connections:
                         children.add(child)
@@ -92,13 +92,13 @@ class Env:
     def find_top(self):
         """Find topmost nodes of current environment."""
         current_level = set()
-        for entry in self.used_ids.values():
+        for entry in self.id_entry_set.values():
             if isinstance(entry, Person) and entry.origin is None:
                 part_with_origin = False
                 partners = self.get_partners(entry.idn)
                 if partners is not None:
                     for partner_id in list(partners):
-                        partner = self.used_ids[partner_id]
+                        partner = self.id_entry_set[partner_id]
                         if partner.origin is not None:
                             part_with_origin = True
                             break
@@ -111,10 +111,10 @@ class Env:
 
          `(id, description)`."""
         ret = []
-        for (k, v) in self.used_ids.items():
+        for (k, v) in self.id_entry_set.items():
             if isinstance(v, Family):
-                desc = self.used_ids[v.head].description() + '&'
-                desc += self.used_ids[v.partner].description()
+                desc = self.id_entry_set[v.head].description() + '&'
+                desc += self.id_entry_set[v.partner].description()
                 i = int(k[1:])
                 ret += [(i, k, desc)]
         ret.sort(key=lambda tup: tup[0])
@@ -126,7 +126,7 @@ class Env:
 
          `(id, description)`."""
         ret = []
-        for (k, v) in self.used_ids.items():
+        for (k, v) in self.id_entry_set.items():
             if isinstance(v, Person):
                 desc = v.description()
                 i = int(k[1:])
@@ -138,6 +138,6 @@ class Env:
     def __str__(self):
         """Return representation for debugging."""
         ret = ""
-        for (k, v) in self.used_ids.items():
+        for (k, v) in self.id_entry_set.items():
             ret += k + " " + str(v)
         return ret

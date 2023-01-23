@@ -115,13 +115,15 @@ class AppWindow(QMainWindow):
     def file_open(self):
         """Open new file and import to the program state."""
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
-        self.prog.import_gedcom(name[0])
-        self.update_imgbox(self.prog.show())
+        if(len(name[0])):
+            self.prog.import_gedcom(name[0])
+            self.update_imgbox(self.prog.show())
 
     def file_export(self):
         """Export current program data to [temp] fixed filename."""
         filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', None, "GEDcom files (*.GED)")
-        self.prog.export_gedcom(filename[0])
+        if(len(filename[0])):
+            self.prog.export_gedcom(filename[0])
 
     def add_person(self):
         """Add person functionality `CTRL+A`."""
@@ -185,7 +187,7 @@ class AppWindow(QMainWindow):
                     self.prog.connect(result_head, result_partner)
                     self.update_imgbox(self.prog.show())
                 else:
-                    PopUpError("Cannot connect to a person to themself.")
+                    PopUpError("Cannot connect to a person to themselves.")
 
 
 if __name__ == "__main__":

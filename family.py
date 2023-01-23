@@ -15,7 +15,7 @@ class Family(Entry):
         self.head = head  # string (idn)
         self.partner = part  # string(idn)
         self.relation_type = rel  # string
-        self.family_connections = None  # list of string(idn)
+        self.family_connections = set()  # set of string(idn)
 
     def getId(self):
         return self.idn

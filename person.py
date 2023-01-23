@@ -13,7 +13,7 @@ class Person(Entry):
     # idn None = not yet assigned, other None = unknown
     u = [UNKNOWN]
 
-    def __init__(self, idn, name=u, sname=u, birt=u, deat=['']):
+    def __init__(self, idn, name=u, sname=u, birt=u, deat=[''], origin=None):
         self.depth = 0
         self.focus = -1
         self.select = False
@@ -22,8 +22,8 @@ class Person(Entry):
         self.surname = sname  # list of string
         self.birth = birt  # list of string TODO change to tuple3/ PLACE?
         self.death = deat  # list of string TODO change to tuple3/ PLACE?
-        self.origin = None  # string(idn_fam)
-        self.family_connections = None  # list of string(idn_fam)
+        self.add_origin(origin)  # string(idn_fam)
+        self.family_connections = set()  # list of string(idn_fam)
 
     def add_origin(self, origin):
         self.origin = origin

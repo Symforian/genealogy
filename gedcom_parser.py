@@ -43,12 +43,20 @@ class GedcomParser:
             idn = str(self.data_holder.get_idn())
             self.env.add_entry(idn, self.data_holder)
             if isinstance(self.data_holder, Person):
-                self.env.next_indi_id += 1
+                self.person_idn(idn)
             elif isinstance(self.data_holder, Family):
-                self.env.next_fam_id += 1
+                self.family_idn(idn)
 
-    # def fam_tag()
-    #    self.data_holder.add(value[1:-1])
+    def family_idn(self, idn):
+        new_fam_idn = int(idn[1:])
+        if new_fam_idn >= self.env.next_fam_id:
+            self.env.next_fam_id = new_fam_idn + 1
+
+    def person_idn(self, idn):
+        new_ind_idn = int(idn[1:])
+        if new_ind_idn >= self.env.next_indi_id:
+            self.env.next_indi_id = new_ind_idn + 1
+
     def assign_child_to_family(self):
         return 0
 

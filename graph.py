@@ -53,7 +53,7 @@ class GraphRepresentation:
         *el* -- element which node will be drawn
         """
         s = 'filled'
-        if el.family_connections is not None:
+        if len(el.family_connections):
             for fam_idn in el.family_connections:
                 self.subtree.node(fam_idn, shape="point")
                 c = GraphRepresentation.get_color(el.focus, el.select)
@@ -150,6 +150,14 @@ class GraphRepresentation:
             self.draw_node(el)
         return next_lv
 
+    def return_next_level(self):
+        """Draw current row of nodes."""
+        next_lv = set()
+        for el_id in self.current_level:
+            el = self.data.entries()[el_id]
+            next_lv |= self.data.get_children(el)
+        return next_lv
+
     def create_nodes(self):
         """
             Create nodes. Manage subtrees (rows).
@@ -171,7 +179,7 @@ class GraphRepresentation:
             if isinstance(entry, Family):
                 self.tree.edge(entry.head, entry.idn, arrowhead="none")
                 self.tree.edge(entry.idn, entry.partner, arrowhead="none")
-                if entry.family_connections is not None:
+                if len(entry.family_connections):
                     for c in entry.family_connections:
                         self.tree.edge(entry.idn, c)
 
