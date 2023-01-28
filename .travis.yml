@@ -1,6 +1,6 @@
 language: python
 python:
-  - 3.11.1
+  - 3.11
 before_install:
   - python --version
   - pip install -U pip
