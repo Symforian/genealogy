@@ -61,7 +61,7 @@ class test_current_level(test_case):
         self.assertTrue(possibility1 | possibility2)
 
     def test_2_connected_people_env(self):
-        g, e, p1, p2 = prepare_2_connected_people_env()
+        g, e, p1, p2, _ = prepare_2_connected_people_env()
         g.select_node(p1.idn)
         g.current_level = e.find_top()
         self.assertEqual(g.current_level, {p1.idn, p2.idn})
