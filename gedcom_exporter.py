@@ -34,6 +34,10 @@ class GedcomExporter:
         return t
 
     def write_name(name, surname):
+        if(len(name) == 0 ):
+            name = Person.UNKNOWN
+        if(len(surname) == 0):
+            surname = Person.UNKNOWN
         ent = '1 NAME ' + reduce(lambda a, b: a + ' ' + b, name)
         ent += ' /' + reduce(lambda a, b: a + ' ' + b, surname) + '/\n2 SURN '
         ent += reduce(lambda a, b: a + ' ' + b, surname) + '\n2 GIVN '

@@ -62,6 +62,9 @@ class GraphRepresentation:
             c = GraphRepresentation.get_color(el.focus, el.select)
             self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
 
+    def sort_current_level(self):
+        pass
+
     def get_current_level_originless_partners(self):
         """Return set of people who do not have origin family specified."""
         result = set()

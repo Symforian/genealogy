@@ -6,6 +6,7 @@
 from tree_env import Env
 from person import Person
 from family import Family
+import chardet
 # GEDCOM standard 5.5
 # http://homepages.rootsweb.com/~pmcbride/gedcom/55gcch1.htm
 
@@ -69,8 +70,11 @@ class GedcomParser:
     def set_death_tag(self):
         self.current_tag = "death"
 
+    def set_name_tag(self):
+        pass
+
     '''parse_tag = {
-        # "INDI": lambda x: person(idn=x),
+        "INDI": lambda x: person(idn=x),
         "NAME":
         "GIVN":
         "SURN":
@@ -90,13 +94,19 @@ class GedcomParser:
             self.data_holder = Person(idn=value[0])
         elif tag == "FAM":
             self.data_holder = Family(idn=value[0])
+        # elif tag == "SUBN":
+        #     self.data_holder = Submitter()
         # else "not_yet_implemented"
 # TODO switcher:
 # https://jaxenter.com/implement-switch-case-statement-python-138315.html
 
     def parse_tag_after_1(self, tag, value):
-        # if tag == "NAME":
-        if tag == "FAM" or tag == "CHIL":
+        if tag == "NAME":
+            if(self.data_holder is not None):
+                self.data_holder.update_data("name", value[0])
+                if(len(value)>1):
+                    self.data_holder.update_data("surname", value[1])
+        elif tag == "FAM" or tag == "CHIL":
             self.data_holder.add(value[0][1:-1])
         elif tag in ["FAMC", "HUSB", "WIFE"]:
             data_type = GedcomParser.MAP_TAG_TO_DATA[tag]
@@ -133,8 +143,13 @@ class GedcomParser:
             # DIV
             return 0
 
+    def detect_encoding(self):
+        with open(self.file, 'rb') as f:
+            return chardet.detect(f.read())['encoding']
+
     def parse(self):
-        with open(self.file, 'r') as reader:
+        encoding = self.detect_encoding()
+        with open(self.file, 'r', encoding=encoding) as reader:            
             line = reader.readline()
             while line != '':
                 # print(GedcomParser.parse_line(line), end='')
