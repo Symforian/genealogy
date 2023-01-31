@@ -1,8 +1,2 @@
-graphviz>=0.13.2
-chardet>=5.1.0
-flake8>=6.0.0
-mccabe>=0.7.0
-pyflakes>=3.0.1
-PyQt5>=5.15.7
-PyQt5-Qt5>=5.15.2
-PyQt5-sip>=12.11.0
+graphviz==0.13.2
+chardet==5.1.0
