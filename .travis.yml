@@ -9,7 +9,6 @@ install:
   - pip install -r requirements.txt
 script: python -m unittest discover .\tests\ # run tests
 after_success:
-  run: |
-  curl -Os https://uploader.codecov.io/latest/windows/codecov
-  chmod +x codecov
-  ./codecov -t ${CODECOV_TOKEN}
+  - curl -Os https://uploader.codecov.io/latest/windows/codecov
+  - chmod +x codecov
+  - ./codecov -t ${CODECOV_TOKEN}
