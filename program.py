@@ -119,7 +119,7 @@ def main_cli():
     """Run program with CLI."""
     p = CommandLineInterface()
     current_command = None
-    while(p.running):
+    while (p.running):
         if current_command is None:
             current_command = p.commands.get(input("Enter command:"), p.error)
             if current_command.__name__ == 'error':

@@ -107,22 +107,25 @@ class AppWindow(QMainWindow):
 
     def file_new(self):
         """Clear program state."""
-        pop = PopUpYesNo("Do you really want to close currently opened tree?\n")
-        if(pop.result() == pop.DialogCode.Accepted):
+        msg = "Do you really want to close currently opened tree?\n"
+        pop = PopUpYesNo(msg)
+        if (pop.result() == pop.DialogCode.Accepted):
             self.prog = Program()
             self.update_imgbox(self.prog.show())
 
     def file_open(self):
         """Open new file and import to the program state."""
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
-        if(len(name[0])):
+        if (len(name[0])):
             self.prog.import_gedcom(name[0])
             self.update_imgbox(self.prog.show())
 
     def file_export(self):
         """Export current program data to [temp] fixed filename."""
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', None, "GEDcom files (*.GED)")
-        if(len(filename[0])):
+        file_types = "GEDcom files (*.GED)"
+        qfile = QtWidgets.QFileDialog
+        filename = qfile.getSaveFileName(self, 'Save File', None, file_types)
+        if (len(filename[0])):
             self.prog.export_gedcom(filename[0])
 
     def add_person(self):
@@ -154,7 +157,8 @@ class AppWindow(QMainWindow):
             pop = PopUpForm("Modify person", origins=ori, pdata=data)
             if pop.result() == pop.DialogCode.Accepted:
                 (name, surname, birth, death, origin) = pop.get_results()
-                self.prog.mod_entry(results, name, surname, birth, death, origin)
+                self.prog.mod_entry(results,
+                                    name, surname, birth, death, origin)
                 self.update_imgbox(self.prog.show())
 
     def rem_person(self):

@@ -102,9 +102,9 @@ class GedcomParser:
 
     def parse_tag_after_1(self, tag, value):
         if tag == "NAME":
-            if(self.data_holder is not None):
+            if (self.data_holder is not None):
                 self.data_holder.update_data("name", value[0])
-                if(len(value)>1):
+                if (len(value) > 1):
                     self.data_holder.update_data("surname", value[1])
         elif tag == "FAM" or tag == "CHIL":
             self.data_holder.add(value[0][1:-1])
@@ -149,7 +149,7 @@ class GedcomParser:
 
     def parse(self):
         encoding = self.detect_encoding()
-        with open(self.file, 'r', encoding=encoding) as reader:            
+        with open(self.file, 'r', encoding=encoding) as reader:
             line = reader.readline()
             while line != '':
                 # print(GedcomParser.parse_line(line), end='')

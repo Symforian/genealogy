@@ -64,12 +64,12 @@ class Person(Entry):
         return ret
 
     def description(self):
-        if(self.name):
+        if (self.name):
             temp = self.name[0]
         else:
             temp = Person.UNKNOWN
         temp += " "
-        if(self.surname):
+        if (self.surname):
             temp += self.surname[0]
         else:
             temp += Person.UNKNOWN

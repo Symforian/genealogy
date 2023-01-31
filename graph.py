@@ -149,7 +149,8 @@ class GraphRepresentation:
         for el_id in self.current_level:
             el = self.data.entries()[el_id]
             next_lv |= self.data.get_children(el)
-            print(self.data.entries()[el_id].name + self.data.entries()[el_id].surname)
+            print(self.data.entries()[el_id].name
+                  + self.data.entries()[el_id].surname)
             self.draw_node(el)
         return next_lv
 

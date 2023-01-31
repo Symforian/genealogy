@@ -97,6 +97,7 @@ class PopUpForm(QDialog):
         else:
             check.setEnabled(True)
 
+
 class PopUpYesNo(QDialog):
 
     def __init__(self, msg):
@@ -112,6 +113,7 @@ class PopUpYesNo(QDialog):
         self.show()
         self.exec_()
 
+
 class PopUpSelect(QDialog):
     NumGridRows = 3
     NumButtons = 4
@@ -120,7 +122,8 @@ class PopUpSelect(QDialog):
         QDialog.__init__(self)
         self.ppl = people
         self.create_form_group_box()
-        btnBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        btnBox = QDialogButtonBox(QDialogButtonBox.Ok
+                                  | QDialogButtonBox.Cancel)
         btnBox.accepted.connect(self.accept)
         btnBox.rejected.connect(self.reject)
         mainLayout = QVBoxLayout()
