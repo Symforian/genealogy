@@ -62,9 +62,11 @@ class Env:
             for person_fam_con_idn in person_fam_con_idns:
                 family = self.id_entry_set[person_fam_con_idn]
                 if family.head == idn:
-                    ids.add(family.partner)
+                    if family.partner:
+                        ids.add(family.partner)
                 else:
-                    ids.add(family.head)
+                    if family.head:
+                        ids.add(family.head)
         return ids
 
     def get_originless_partners(self, idn):
@@ -78,15 +80,31 @@ class Env:
                     result.add(partner_id)
         return result
 
-    def get_children(self, el):
+    def get_children(self, person):
         """Return set of children given person."""
         children = set()
-        if el.family_connections is not None:
-            for fam_idn in el.family_connections:
+        if person.family_connections is not None:
+            for fam_idn in person.family_connections:
                 family = self.id_entry_set[fam_idn]
                 if family.family_connections is not None:
                     for child in family.family_connections:
                         children.add(child)
+        return children
+
+    def get_families(self, person: Person):
+        """Return set of families given person."""
+        families = set()
+        if person.family_connections is not None:
+            for fam_idn in person.family_connections:
+                families.add(fam_idn)
+        return families
+
+    def get_children_from_family(self, family: Family):
+        """Return set of children given person."""
+        children = set()
+        if family.family_connections is not None:
+            for child in family.family_connections:
+                children.add(child)
         return children
 
     def find_top(self):
@@ -113,8 +131,14 @@ class Env:
         ret = []
         for (k, v) in self.id_entry_set.items():
             if isinstance(v, Family):
-                desc = self.id_entry_set[v.head].description() + '&'
-                desc += self.id_entry_set[v.partner].description()
+                desc = ""
+                if v.head:
+                    desc += self.id_entry_set[v.head].description()
+                if v.head and v.partner:
+                    desc += " & "
+                if v.partner:
+                    desc += self.id_entry_set[v.partner].description()
+                desc += f"({v.idn})"
                 i = int(k[1:])
                 ret += [(i, k, desc)]
         ret.sort(key=lambda tup: tup[0])

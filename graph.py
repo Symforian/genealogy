@@ -40,6 +40,7 @@ class GraphRepresentation:
         """
         self.data = data
         self.current_level = set()
+        self.drawn_entries = set()
         self.selected = False
 
     def send_data(self, data):
@@ -103,7 +104,8 @@ class GraphRepresentation:
         """
         if person.origin is not None:
             bloodline = self.data.entries()[person.origin]
-            right_side = self.data.entries()[bloodline.head]
+            if bloodline.head:
+                right_side = self.data.entries()[bloodline.head]
             if current_focus > -1:
                 right_side.focus = current_focus + 1
             else:
@@ -146,12 +148,17 @@ class GraphRepresentation:
     def draw_level_return_next(self):
         """Draw current row of nodes."""
         next_lv = set()
-        for el_id in self.current_level:
-            el = self.data.entries()[el_id]
-            next_lv |= self.data.get_children(el)
-            print(self.data.entries()[el_id].name
-                  + self.data.entries()[el_id].surname)
-            self.draw_node(el)
+        current_level_families = set()
+        for person_id in self.current_level:
+            person = self.data.entries()[person_id]
+            current_level_families |= self.data.get_families(person)
+        for family_id in current_level_families:
+            family = self.data.entries()[family_id]
+            next_lv |= self.data.get_children_from_family(family)
+            if family.head:
+                self.draw_node(self.data.entries()[family.head])
+            if family.partner:
+                self.draw_node(self.data.entries()[family.partner])
         return next_lv
 
     def return_next_level(self):
@@ -181,8 +188,10 @@ class GraphRepresentation:
         """Draw edges."""
         for entry in self.data.entries().values():
             if isinstance(entry, Family):
-                self.tree.edge(entry.head, entry.idn, arrowhead="none")
-                self.tree.edge(entry.idn, entry.partner, arrowhead="none")
+                if entry.head:
+                    self.tree.edge(entry.head, entry.idn, arrowhead="none")
+                if entry.partner:
+                    self.tree.edge(entry.idn, entry.partner, arrowhead="none")
                 if len(entry.family_connections):
                     for c in entry.family_connections:
                         self.tree.edge(entry.idn, c)

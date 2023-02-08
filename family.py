@@ -28,7 +28,7 @@ class Family(Entry):
         elif data == "relation_type":
             self.relation_type = new_value
         elif data == "children":
-            self.children = new_value
+            self.family_connections = new_value
 
     def flip(self):
         temp = self.head

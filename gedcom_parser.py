@@ -106,12 +106,12 @@ class GedcomParser:
                 self.data_holder.update_data("name", value[0])
                 if (len(value) > 1):
                     self.data_holder.update_data("surname", value[1])
-        elif tag == "FAM" or tag == "CHIL":
+        elif tag in ["FAM", "CHIL", "FAMS"]:
             self.data_holder.add(value[0][1:-1])
         elif tag in ["FAMC", "HUSB", "WIFE"]:
             data_type = GedcomParser.MAP_TAG_TO_DATA[tag]
             self.data_holder.update_data(data_type, value[0][1:-1])
-        elif tag == "BIRT" or tag == "DEAT":
+        elif tag in ["BIRT", "DEAT"]:
             self.current_tag = GedcomParser.MAP_TAG_TO_DATA[tag]
         elif tag == "MARR":
             self.data_holder.update_data("relation_type", "marriage")
