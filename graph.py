@@ -39,7 +39,7 @@ class GraphRepresentation:
         If `data` is `None`, the representation's enviroment is empty.
         """
         self.data = data
-        self.current_level = set()
+        self.current_level = list()
         self.drawn_entries = set()
         self.selected = False
 
@@ -57,22 +57,24 @@ class GraphRepresentation:
         if len(el.family_connections):
             for fam_idn in el.family_connections:
                 self.subtree.node(fam_idn, shape="point")
-                c = GraphRepresentation.get_color(el.focus, el.select)
-                self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
-        else:
-            c = GraphRepresentation.get_color(el.focus, el.select)
-            self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
+                self.drawn_entries.add(fam_idn)
+        c = GraphRepresentation.get_color(el.focus, el.select)
+        self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
+        self.drawn_entries.add(el.idn)
 
     def sort_current_level(self):
         pass
 
-    def get_current_level_originless_partners(self):
-        """Return set of people who do not have origin family specified."""
-        result = set()
+    def add_current_level_originless_partners(self):
+        """Inserts people who do not have origin specified to current_level"""
+        result = list()
         for p_id in self.current_level:
+            result.append(p_id)
             originless_partners = self.data.get_originless_partners(p_id)
-            result |= originless_partners
-        return result
+            for originless_partner in originless_partners:
+                if originless_partner not in self.drawn_entries:
+                    result.append(originless_partner)
+        self.current_level = result
 
     def focus_children(self, children, value=0):
         """
@@ -147,35 +149,47 @@ class GraphRepresentation:
 
     def draw_level_return_next(self):
         """Draw current row of nodes."""
-        next_lv = set()
-        current_level_families = set()
+        next_lv = list()
+        current_lv_ids = list()
         for person_id in self.current_level:
             person = self.data.entries()[person_id]
-            current_level_families |= self.data.get_families(person)
-        for family_id in current_level_families:
-            family = self.data.entries()[family_id]
-            next_lv |= self.data.get_children_from_family(family)
-            if family.head:
-                self.draw_node(self.data.entries()[family.head])
-            if family.partner:
-                self.draw_node(self.data.entries()[family.partner])
+            families = self.data.get_families(person)
+            if len(families):
+                current_lv_ids += [fam for fam in families
+                                   if fam not in self.drawn_entries]
+            elif person_id not in self.drawn_entries:
+                current_lv_ids.append(person_id)
+        for id in current_lv_ids:
+            entry = self.data.entries()[id]
+            if isinstance(entry, Family):
+                children = self.data.get_children_from_family(entry)
+                if len(children):
+                    next_lv += [child for child in children
+                                if child not in self.drawn_entries]
+                if entry.head:
+                    self.draw_node(self.data.entries()[entry.head])
+                if entry.partner:
+                    self.draw_node(self.data.entries()[entry.partner])
+            elif isinstance(entry, Person):
+                self.draw_node(self.data.entries()[id])
         return next_lv
 
     def return_next_level(self):
         """Draw current row of nodes."""
-        next_lv = set()
+        next_lv = list()
         for el_id in self.current_level:
             el = self.data.entries()[el_id]
-            next_lv |= self.data.get_children(el)
+            children = self.data.get_children(el)
+            next_lv.append([child for child in children
+                           if child not in self.drawn_entries])
         return next_lv
 
     def create_nodes(self):
         """
             Create nodes. Manage subtrees (rows).
         """
-        next_level = set()
-        originless = self.get_current_level_originless_partners()
-        self.current_level |= originless
+        next_level = list()
+        self.add_current_level_originless_partners()
         self.subtree = Tree()
         self.subtree.attr(rank='same', ordering='out')
         next_level = self.draw_level_return_next()
@@ -201,6 +215,7 @@ class GraphRepresentation:
            If `just_show` is `False` return the tree instead.
         """
         self.tree = Tree()
+        self.drawn_entries = set()
         self.current_level = self.data.find_top()
         self.selected = False
         self.create_nodes()

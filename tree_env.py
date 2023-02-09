@@ -72,12 +72,12 @@ class Env:
     def get_originless_partners(self, idn):
         """Return set of partners without origin given person's id number."""
         partners = self.get_partners(idn)
-        result = set()
+        result = list()
         if partners is not None:
             for partner_id in partners:
                 partner = self.id_entry_set[partner_id]
                 if partner.origin is None:
-                    result.add(partner_id)
+                    result.append(partner_id)
         return result
 
     def get_children(self, person):
@@ -100,7 +100,7 @@ class Env:
         return families
 
     def get_children_from_family(self, family: Family):
-        """Return set of children given person."""
+        """Return set of children given family."""
         children = set()
         if family.family_connections is not None:
             for child in family.family_connections:
@@ -109,7 +109,7 @@ class Env:
 
     def find_top(self):
         """Find topmost nodes of current environment."""
-        current_level = set()
+        current_level = list()
         for entry in self.id_entry_set.values():
             if isinstance(entry, Person) and entry.origin is None:
                 part_with_origin = False
@@ -121,7 +121,7 @@ class Env:
                             part_with_origin = True
                             break
                 if not part_with_origin:
-                    current_level.add(entry.idn)
+                    current_level.append(entry.idn)
         return current_level
 
     def get_fam_ids_desc(self):
