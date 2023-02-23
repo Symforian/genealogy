@@ -110,8 +110,11 @@ class Env:
     def find_top(self):
         """Find topmost nodes of current environment."""
         current_level = list()
+        current_level_set = set()
         for entry in self.id_entry_set.values():
             if isinstance(entry, Person) and entry.origin is None:
+                if entry.idn in current_level_set:
+                    continue
                 part_with_origin = False
                 partners = self.get_partners(entry.idn)
                 if partners is not None:
@@ -122,6 +125,25 @@ class Env:
                             break
                 if not part_with_origin:
                     current_level.append(entry.idn)
+                    current_level_set.add(entry.idn)
+                    for partner_id in list(partners):
+                        if partner_id not in current_level_set:
+                            current_level.append(partner_id)
+                            current_level_set.add(partner_id)
+        for entry_idn in current_level:
+            counter = 0
+            e_idn = entry_idn
+            while e_idn:
+                entry = self.entries()[e_idn]
+                if entry.family_connections:
+                    fam_idn = next(iter(entry.family_connections))
+                    family = self.entries()[fam_idn]
+                    if family.family_connections:
+                        e_idn = next(iter(family.family_connections))
+                        counter += 1
+                else:
+                    break
+            print(f"{entry_idn} + [{counter}]")
         return current_level
 
     def get_fam_ids_desc(self):

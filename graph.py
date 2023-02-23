@@ -166,10 +166,13 @@ class GraphRepresentation:
                 if len(children):
                     next_lv += [child for child in children
                                 if child not in self.drawn_entries]
+                family_not_drawn = entry.idn not in self.drawn_entries
                 if entry.head:
                     self.draw_node(self.data.entries()[entry.head])
                 if entry.partner:
                     self.draw_node(self.data.entries()[entry.partner])
+                if family_not_drawn and entry.idn in self.drawn_entries:
+                    self.draw_edge(entry)
             elif isinstance(entry, Person):
                 self.draw_node(self.data.entries()[id])
         return next_lv
@@ -189,37 +192,34 @@ class GraphRepresentation:
             Create nodes. Manage subtrees (rows).
         """
         next_level = list()
-        self.add_current_level_originless_partners()
         self.subtree = Tree()
-        self.subtree.attr(rank='same', ordering='out')
+        self.subtree.attr(rank="same", ordering="in")
         next_level = self.draw_level_return_next()
         self.tree.subgraph(self.subtree)
         if len(next_level) != 0:
             self.current_level = next_level
             self.create_nodes()
 
-    def create_connections(self):
+    def draw_edge(self, family: Family):
         """Draw edges."""
-        for entry in self.data.entries().values():
-            if isinstance(entry, Family):
-                if entry.head:
-                    self.tree.edge(entry.head, entry.idn, arrowhead="none")
-                if entry.partner:
-                    self.tree.edge(entry.idn, entry.partner, arrowhead="none")
-                if len(entry.family_connections):
-                    for c in entry.family_connections:
-                        self.tree.edge(entry.idn, c)
+        if family.head:
+            self.tree.edge(family.head, family.idn, arrowhead="none")
+        if family.partner:
+            self.tree.edge(family.idn, family.partner, arrowhead="none")
+        if len(family.family_connections):
+            for c in family.family_connections:
+                self.tree.edge(family.idn, c)
 
     def show(self, just_show=False):
         """Display proper tree.
            If `just_show` is `False` return the tree instead.
         """
         self.tree = Tree()
+        self.tree.attr(rank="same", ordering="in")
         self.drawn_entries = set()
         self.current_level = self.data.find_top()
         self.selected = False
         self.create_nodes()
-        self.create_connections()
 
         if just_show:
             self.tree.view()
