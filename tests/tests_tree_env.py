@@ -7,21 +7,21 @@ from unittest import TestCase, main, mock
 class test_find_top(TestCase):
 
     def test_empty_env(self):
-        self.assertEqual(Env().find_top(), set())
+        self.assertEqual(Env().find_top(), [])
 
     def test_1_person_env(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
-                                  family_connections=None)
+                                  family_connections=set())
         e = Env({p1.idn: p1})
-        self.assertEqual(e.find_top(), {p1.idn})
+        self.assertEqual(e.find_top(), [p1.idn])
 
     def test_2_unrelated_people_env(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
-                                  family_connections=None)
+                                  family_connections=set())
         p2 = mock.create_autospec(Person, idn='I2', origin=None,
-                                  family_connections=None)
+                                  family_connections=set())
         e = Env({p1.idn: p1, p2.idn: p2})
-        self.assertTrue(e.find_top(), {p1.idn, p2.idn})
+        self.assertTrue(e.find_top(), [p1.idn, p2.idn])
 
     def test_2_connected_people_env(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
@@ -31,7 +31,7 @@ class test_find_top(TestCase):
         f1 = mock.create_autospec(Family, idn='F1', head='I1',
                                   partner='I2')
         e = Env({p1.idn: p1, p2.idn: p2, f1.idn: f1})
-        self.assertEqual(e.find_top(), {p1.idn, p2.idn})
+        self.assertEqual(e.find_top(), [p1.idn, p2.idn])
 
     def test_selected_parents_order(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
@@ -43,7 +43,7 @@ class test_find_top(TestCase):
         p3 = mock.create_autospec(Person, idn='I3', origin='F1',
                                   family_connections=None)
         e = Env({p1.idn: p1, p2.idn: p2, p3.idn: p3, f1.idn: f1})
-        self.assertEqual(e.find_top(), {p1.idn, p2.idn})
+        self.assertEqual(e.find_top(), [p1.idn, p2.idn])
 
     def test_selected_has_siblings_and_partner(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
@@ -64,7 +64,7 @@ class test_find_top(TestCase):
                                   partner='I6', family_connections=None)
         e = Env({p1.idn: p1, p2.idn: p2, p3.idn: p3, p4.idn: p4,
                 p5.idn: p5, p6.idn: p6, f1.idn: f1, f2.idn: f2})
-        self.assertEqual(e.find_top(), {p1.idn, p2.idn})
+        self.assertEqual(e.find_top(), [p1.idn, p2.idn])
 
     def test_selected_has_siblings_and_partner_and_child(self):
         p1 = mock.create_autospec(Person, idn='I1', origin=None,
@@ -87,7 +87,7 @@ class test_find_top(TestCase):
                                   partner='I6', family_connections=['I7'])
         e = Env({p1.idn: p1, p2.idn: p2, p3.idn: p3, p4.idn: p4, p5.idn: p5,
                  p6.idn: p6, p7.idn: p7, f1.idn: f1, f2.idn: f2})
-        self.assertEqual(e.find_top(), {p1.idn, p2.idn})
+        self.assertEqual(e.find_top(), [p1.idn, p2.idn])
 
 
 class test_get_partners(TestCase):

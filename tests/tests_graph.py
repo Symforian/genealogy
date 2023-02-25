@@ -52,31 +52,31 @@ class test_current_level(test_case):
     def test_empty_env(self):
         g, e = prepare_empty_env()
         g.current_level = e.find_top()
-        self.assertEqual(g.current_level, set())
+        self.assertEqual(g.current_level, [])
 
     def test_1_person_env(self):
         g, e, p = prepare_1_person_env()
         g.current_level = e.find_top()
-        self.assertEqual(g.current_level, {p.idn})
+        self.assertEqual(g.current_level, [p.idn])
 
     def test_2_unrelated_people_env(self):
         g, e, p1, p2 = prepare_2_unrelated_people_env()
         g.current_level = e.find_top()
-        possibility1 = g.current_level == {p1.idn, p2.idn}
-        possibility2 = g.current_level == {p2.idn, p1.idn}
+        possibility1 = g.current_level == [p1.idn, p2.idn]
+        possibility2 = g.current_level == [p2.idn, p1.idn]
         self.assertTrue(possibility1 | possibility2)
 
     def test_2_connected_people_env(self):
         g, e, p1, p2, _ = prepare_2_connected_people_env()
         g.select_node(p1.idn)
         g.current_level = e.find_top()
-        self.assertEqual(g.current_level, {p1.idn, p2.idn})
+        self.assertEqual(g.current_level, [p1.idn, p2.idn])
 
     def test_selected_parents_order(self):
         g, e, p1, p2, p3, _ = prepare_family_of_3_people_env()
         g.select_node(p3.idn)
         g.current_level = e.find_top()
-        self.assertEqual(g.current_level, {p1.idn, p2.idn})
+        self.assertEqual(g.current_level, [p1.idn, p2.idn])
 
     def test_selected_has_siblings_and_partner(self):
         return '''TODO FIX'''
@@ -123,13 +123,13 @@ class test_sort_current_level(test_case):
         g, e = prepare_empty_env()
         g.current_level = e.find_top()
         g.sort_current_level()
-        self.assertEqual(g.current_level, set())
+        self.assertEqual(g.current_level, [])
 
     def test_1_person_env(self):
         g, e, p = prepare_1_person_env()
         g.current_level = e.find_top()
         g.sort_current_level()
-        self.assertEqual(g.current_level, {p.idn})
+        self.assertEqual(g.current_level, [p.idn])
 
 
 if __name__ == '__main__':
