@@ -130,20 +130,6 @@ class Env:
                         if partner_id not in current_level_set:
                             current_level.append(partner_id)
                             current_level_set.add(partner_id)
-        for entry_idn in current_level:
-            counter = 0
-            e_idn = entry_idn
-            while e_idn:
-                entry = self.entries()[e_idn]
-                if entry.family_connections:
-                    fam_idn = next(iter(entry.family_connections))
-                    family = self.entries()[fam_idn]
-                    if family.family_connections:
-                        e_idn = next(iter(family.family_connections))
-                        counter += 1
-                else:
-                    break
-            print(f"{entry_idn} + [{counter}]")
         return current_level
 
     def get_fam_ids_desc(self):

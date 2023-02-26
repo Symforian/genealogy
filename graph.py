@@ -42,6 +42,7 @@ class GraphRepresentation:
         self.current_level = list()
         self.drawn_entries = set()
         self.selected = False
+        self.current_depth = 0
 
     def send_data(self, data):
         self.data = data
@@ -147,18 +148,25 @@ class GraphRepresentation:
                 self.select_node(entry.idn, deselect=True)
                 break
 
+    def add_families_to_current_level(self, next_level, current_level_ids):
+        for person_id in self.current_level:
+            person = self.data.entries()[person_id]
+            if person.depth != self.current_depth:
+                next_level.append(person_id)
+                continue
+            families = self.data.get_families(person)
+            if len(families):
+                current_level_ids += [fam for fam in families
+                                      if fam not in self.drawn_entries and
+                                      fam not in current_level_ids]
+            elif person_id not in self.drawn_entries:
+                current_level_ids.append(person_id)
+
     def draw_level_return_next(self):
         """Draw current row of nodes."""
         next_lv = list()
         current_lv_ids = list()
-        for person_id in self.current_level:
-            person = self.data.entries()[person_id]
-            families = self.data.get_families(person)
-            if len(families):
-                current_lv_ids += [fam for fam in families
-                                   if fam not in self.drawn_entries]
-            elif person_id not in self.drawn_entries:
-                current_lv_ids.append(person_id)
+        self.add_families_to_current_level(next_lv, current_lv_ids)
         for id in current_lv_ids:
             entry = self.data.entries()[id]
             if isinstance(entry, Family):
@@ -197,6 +205,7 @@ class GraphRepresentation:
         next_level = self.draw_level_return_next()
         self.tree.subgraph(self.subtree)
         if len(next_level) != 0:
+            self.current_depth -= 1
             self.current_level = next_level
             self.create_nodes()
 
@@ -210,14 +219,90 @@ class GraphRepresentation:
             for c in family.family_connections:
                 self.tree.edge(family.idn, c)
 
+    def push_up(self, idn, offset):
+        if not idn:
+            return -1
+        self.data.entries()[idn].depth += offset
+        entry = self.data.entries()[idn]
+        if not entry.origin:
+            return self.data.entries()[idn].depth
+        family_origin = self.data.entries()[entry.origin]
+        return max(self.push_up(family_origin.head, offset),
+                   self.push_up(family_origin.partner, offset))
+
+    def fix_family_depth(self):
+        max_depth = 0
+        for (idn, entry) in self.data.id_entry_set.items():
+            if isinstance(entry, Family) and entry.head and entry.partner:
+                head_depth = self.data.entries()[entry.head].depth
+                partner_depth = self.data.entries()[entry.partner].depth
+                tmp = -1
+                if head_depth < partner_depth:
+                    tmp = self.push_up(entry.head, partner_depth - head_depth)
+                elif partner_depth < head_depth:
+                    tmp = self.push_up(entry.partner, head_depth - partner_depth)
+                max_depth = max(max_depth, tmp)
+        return max_depth
+
+    def set_current_tree_depth(self):
+        current_depth = 0
+        for entry_idn in self.current_level:
+            entry_depth = self.set_person_depth(entry_idn, 0)
+            current_depth = max(entry_depth, current_depth)
+        self.current_depth = max(current_depth, self.fix_family_depth())
+
+    def set_person_depth(self, person_id, depth):
+        entry = self.data.entries()[person_id]
+        if not entry.family_connections:
+            self.data.entries()[person_id].depth = depth
+            return depth
+        max_depth = depth
+        for fam_idn in entry.family_connections:
+            family = self.data.entries()[fam_idn]
+            if family.family_connections:
+                child_id_result = list()
+                for child_id in family.family_connections:
+                    child_depth = self.set_person_depth(child_id, depth + 1)
+                    child_id_result.append((child_id, child_depth))
+                    max_depth = max(child_depth, max_depth)
+                for child_id, result in child_id_result:
+                    if result < max_depth:
+                        offset = (max_depth - result) + depth + 1
+                        self.set_person_depth(child_id, offset)
+                max_depth += 1
+            # if family.head and family.partner:
+            #     f_depth = 0
+            #     if family.head == person_id:
+            #         partner_id = family.partner
+            #     elif family.partner == person_id:
+            #         partner_id = family.head
+            #     partner_entry = self.data.entries()[partner_id]
+            #     if partner_entry.depth < max_depth and partner_entry.depth != -1:
+            #         self.data.entries()[person_id].depth = -1
+            #         f_depth = self.set_person_depth(partner_id, max_depth)
+            #     max_depth = max(max_depth, f_depth)
+        self.data.entries()[person_id].depth = max_depth
+        return max_depth
+
     def show(self, just_show=False):
         """Display proper tree.
            If `just_show` is `False` return the tree instead.
         """
+        if False:
+            return self.tree.render(format='jpeg')
         self.tree = Tree()
         self.tree.attr(rank="same", ordering="in")
         self.drawn_entries = set()
         self.current_level = self.data.find_top()
+        self.set_current_tree_depth()
+        for (idn, entry) in self.data.id_entry_set.items():
+            # if isinstance(entry, Person):
+            #     print(f"{idn} {entry.name} {entry.surname} [{entry.depth}]")
+            # el
+            if (isinstance(entry, Family) and entry.head and entry.partner
+               and
+               (self.data.entries()[entry.head].depth != self.data.entries()[entry.partner].depth)):
+                print(f"{entry.idn} {entry.head} {entry.partner}")
         self.selected = False
         self.create_nodes()
 
