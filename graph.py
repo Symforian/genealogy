@@ -2,17 +2,13 @@
     Contains graph representation.
     Is responsible for:
 
-    Drawing nodes and edges.
-
-    Sorting nodes.
+    Sorting and placing nodes with proper data.
 
     Focus select.
-
-    Using graphviz to generate image.
 """
-from graphviz import Digraph as Tree
 from person import Person
 from family import Family
+from tree import Tree
 
 
 class GraphRepresentation:
@@ -41,6 +37,7 @@ class GraphRepresentation:
         self.data = data
         self.current_level = list()
         self.drawn_entries = set()
+        self.tree = Tree()
         self.selected = False
         self.current_depth = 0
 
@@ -54,13 +51,12 @@ class GraphRepresentation:
 
         *el* -- element which node will be drawn
         """
-        s = 'filled'
         if len(el.family_connections):
             for fam_idn in el.family_connections:
-                self.subtree.node(fam_idn, shape="point")
+                self.subtree.draw_point(fam_idn)
                 self.drawn_entries.add(fam_idn)
         c = GraphRepresentation.get_color(el.focus, el.select)
-        self.subtree.node(el.idn, el.clean_display(), style=s, color=c)
+        self.subtree.draw_node(el.idn, el.clean_display(), color=c)
         self.drawn_entries.add(el.idn)
 
     def sort_current_level(self):
@@ -180,7 +176,7 @@ class GraphRepresentation:
                 if entry.partner:
                     self.draw_node(self.data.entries()[entry.partner])
                 if family_not_drawn and entry.idn in self.drawn_entries:
-                    self.draw_edge(entry)
+                    self.draw_edges(entry)
             elif isinstance(entry, Person):
                 self.draw_node(self.data.entries()[id])
         return next_lv
@@ -201,23 +197,22 @@ class GraphRepresentation:
         """
         next_level = list()
         self.subtree = Tree()
-        self.subtree.attr(rank="same", ordering="in")
         next_level = self.draw_level_return_next()
-        self.tree.subgraph(self.subtree)
+        self.tree.add_subtree(self.subtree)
         if len(next_level) != 0:
             self.current_depth -= 1
             self.current_level = next_level
             self.create_nodes()
 
-    def draw_edge(self, family: Family):
+    def draw_edges(self, family: Family):
         """Draw edges."""
         if family.head:
-            self.tree.edge(family.head, family.idn, arrowhead="none")
+            self.tree.draw_arrowless_edge(family.head, family.idn)
         if family.partner:
-            self.tree.edge(family.idn, family.partner, arrowhead="none")
+            self.tree.draw_arrowless_edge(family.idn, family.partner)
         if len(family.family_connections):
             for c in family.family_connections:
-                self.tree.edge(family.idn, c)
+                self.tree.draw_edge(family.idn, c)
 
     def push_up(self, idn, offset):
         if not idn:
@@ -240,7 +235,8 @@ class GraphRepresentation:
                 if head_depth < partner_depth:
                     tmp = self.push_up(entry.head, partner_depth - head_depth)
                 elif partner_depth < head_depth:
-                    tmp = self.push_up(entry.partner, head_depth - partner_depth)
+                    difference = head_depth - partner_depth
+                    tmp = self.push_up(entry.partner, difference)
                 max_depth = max(max_depth, tmp)
         return max_depth
 
@@ -270,17 +266,6 @@ class GraphRepresentation:
                         offset = (max_depth - result) + depth + 1
                         self.set_person_depth(child_id, offset)
                 max_depth += 1
-            # if family.head and family.partner:
-            #     f_depth = 0
-            #     if family.head == person_id:
-            #         partner_id = family.partner
-            #     elif family.partner == person_id:
-            #         partner_id = family.head
-            #     partner_entry = self.data.entries()[partner_id]
-            #     if partner_entry.depth < max_depth and partner_entry.depth != -1:
-            #         self.data.entries()[person_id].depth = -1
-            #         f_depth = self.set_person_depth(partner_id, max_depth)
-            #     max_depth = max(max_depth, f_depth)
         self.data.entries()[person_id].depth = max_depth
         return max_depth
 
@@ -288,25 +273,10 @@ class GraphRepresentation:
         """Display proper tree.
            If `just_show` is `False` return the tree instead.
         """
-        if False:
-            return self.tree.render(format='jpeg')
         self.tree = Tree()
-        self.tree.attr(rank="same", ordering="in")
         self.drawn_entries = set()
         self.current_level = self.data.find_top()
         self.set_current_tree_depth()
-        for (idn, entry) in self.data.id_entry_set.items():
-            # if isinstance(entry, Person):
-            #     print(f"{idn} {entry.name} {entry.surname} [{entry.depth}]")
-            # el
-            if (isinstance(entry, Family) and entry.head and entry.partner
-               and
-               (self.data.entries()[entry.head].depth != self.data.entries()[entry.partner].depth)):
-                print(f"{entry.idn} {entry.head} {entry.partner}")
         self.selected = False
         self.create_nodes()
-
-        if just_show:
-            self.tree.view()
-        else:
-            return self.tree.render(format='jpeg')
+        return self.tree.get_result(just_show)
