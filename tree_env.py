@@ -52,6 +52,14 @@ class Env:
         """Return environment as dictionary."""
         return self.id_entry_set
 
+    def get_families(self):
+        return dict(filter(lambda item: isinstance(item[1], Family),
+                           iter(self.id_entry_set.items()))).items()
+
+    def get_persons(self):
+        return dict(filter(lambda item: isinstance(item[1], Person),
+                           iter(self.id_entry_set.items()))).items()
+
     def get_partners(self, idn):
         """Return set of partners given person's identification number."""
         person_fam_con_idns = self.id_entry_set[idn].family_connections
@@ -91,7 +99,7 @@ class Env:
                         children.add(child)
         return children
 
-    def get_families(self, person: Person):
+    def get_person_families(self, person: Person):
         """Return set of families given person."""
         families = set()
         if person.family_connections is not None:
@@ -111,25 +119,24 @@ class Env:
         """Find topmost nodes of current environment."""
         current_level = list()
         current_level_set = set()
-        for entry in self.id_entry_set.values():
-            if isinstance(entry, Person) and entry.origin is None:
-                if entry.idn in current_level_set:
-                    continue
-                part_with_origin = False
-                partners = self.get_partners(entry.idn)
-                if partners is not None:
-                    for partner_id in list(partners):
-                        partner = self.id_entry_set[partner_id]
-                        if partner.origin is not None:
-                            part_with_origin = True
-                            break
-                if not part_with_origin:
-                    current_level.append(entry.idn)
-                    current_level_set.add(entry.idn)
-                    for partner_id in list(partners):
-                        if partner_id not in current_level_set:
-                            current_level.append(partner_id)
-                            current_level_set.add(partner_id)
+        for entry_idn, entry in self.get_persons():
+            if entry.origin is not None or entry_idn in current_level_set:
+                continue
+            part_with_origin = False
+            partners = self.get_partners(entry_idn)
+            if partners is not None:
+                for partner_id in list(partners):
+                    partner = self.id_entry_set[partner_id]
+                    if partner.origin is not None:
+                        part_with_origin = True
+                        break
+            if not part_with_origin:
+                current_level.append(entry_idn)
+                current_level_set.add(entry_idn)
+                for partner_id in list(partners):
+                    if partner_id not in current_level_set:
+                        current_level.append(partner_id)
+                        current_level_set.add(partner_id)
         return current_level
 
     def get_fam_ids_desc(self):

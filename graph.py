@@ -139,9 +139,9 @@ class GraphRepresentation:
 
     def deselect(self):
         """Set all nodes' color to default."""
-        for entry in self.data.entries().values():
-            if isinstance(entry, Person) and entry.select:
-                self.select_node(entry.idn, deselect=True)
+        for entry_idn, entry in self.data.get_persons():
+            if entry.select:
+                self.select_node(entry_idn, deselect=True)
                 break
 
     def add_families_to_current_level(self, next_level, current_level_ids):
@@ -150,7 +150,7 @@ class GraphRepresentation:
             if person.depth != self.current_depth:
                 next_level.append(person_id)
                 continue
-            families = self.data.get_families(person)
+            families = self.data.get_person_families(person)
             if len(families):
                 current_level_ids += [fam for fam in families
                                       if fam not in self.drawn_entries and
@@ -227,17 +227,17 @@ class GraphRepresentation:
 
     def fix_family_depth(self):
         max_depth = 0
-        for (idn, entry) in self.data.id_entry_set.items():
-            if isinstance(entry, Family) and entry.head and entry.partner:
-                head_depth = self.data.entries()[entry.head].depth
-                partner_depth = self.data.entries()[entry.partner].depth
-                tmp = -1
-                if head_depth < partner_depth:
-                    tmp = self.push_up(entry.head, partner_depth - head_depth)
-                elif partner_depth < head_depth:
-                    difference = head_depth - partner_depth
-                    tmp = self.push_up(entry.partner, difference)
-                max_depth = max(max_depth, tmp)
+        for _, family in self.data.get_families():
+            if not family.head or not family.partner:
+                continue
+            head_depth = self.data.entries()[family.head].depth
+            partner_depth = self.data.entries()[family.partner].depth
+            tmp = -1
+            if head_depth < partner_depth:
+                tmp = self.push_up(family.head, partner_depth - head_depth)
+            elif partner_depth < head_depth:
+                tmp = self.push_up(family.partner, head_depth - partner_depth)
+            max_depth = max(max_depth, tmp)
         return max_depth
 
     def set_current_tree_depth(self):
