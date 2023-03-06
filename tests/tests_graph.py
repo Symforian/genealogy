@@ -1,51 +1,13 @@
 from graph import GraphRepresentation as g_r
+from tests.environments_for_tests import (prepare_empty_env,
+                                          prepare_1_person_env,
+                                          prepare_2_unrelated_people_env,
+                                          prepare_2_connected_people_env,
+                                          prepare_family_of_3_people_env)
 from tree_env import Env as env
 from person import Person as per
 from family import Family as fam
 from unittest import TestCase as test_case, main
-
-
-def prepare_empty_env():
-    g = g_r()
-    e = env()
-    g.send_data(e)
-    return g, e
-
-
-def prepare_1_person_env():
-    g, e = prepare_empty_env()
-    p = per(e.generate_idn('person'), name=['Adam'])
-    e.add_entry(p.idn, p)
-    g.send_data(e)
-    return g, e, p
-
-
-def prepare_2_unrelated_people_env():
-    g, e, p1 = prepare_1_person_env()
-    p2 = per(e.generate_idn('person'), name=['Eve'])
-    e.add_entry(p2.idn, p2)
-    g.send_data(e)
-    return g, e, p1, p2
-
-
-def prepare_2_connected_people_env():
-    g, e, p1, p2 = prepare_2_unrelated_people_env()
-    f = fam(e.generate_idn('family'), head=p1.idn, part=p2.idn)
-    p1.add(f.idn)
-    p2.add(f.idn)
-    e.add_entry(f.idn, f)
-    g.send_data(e)
-    return g, e, p1, p2, f
-
-
-def prepare_family_of_3_people_env():
-    g, e, p1, p2, f = prepare_2_connected_people_env()
-    p3 = per(e.generate_idn('person'), name=['Aaron'])
-    f.add(p3.idn)
-    p3.add_origin(f.idn)
-    e.add_entry(p3.idn, p3)
-    g.send_data(e)
-    return g, e, p1, p2, p3, f
 
 
 class test_current_level(test_case):
