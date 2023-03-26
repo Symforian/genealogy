@@ -13,7 +13,7 @@ class Tree:
 
     def __init__(self):
         self.__tree = InternalTree()
-        self.__tree.attr(rank="same", ordering="in")
+        self.__tree.attr(rank="same", ordering="in", node="pin=true")
 
     def draw_edge(self, node_a, node_b):
         self.__draw_edge(node_a, node_b)

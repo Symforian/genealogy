@@ -8,10 +8,17 @@
 """
 from person import Person
 from family import Family
-from tree import Tree
+from tree_pillow import Tree
 
 
 class GraphRepresentation:
+
+    MODE = 1
+
+    MODES = {
+        "GRAPHVIZ": 0,
+        "PILLOW": 1,
+    }
 
     NODE_COLOR = {
         "default": '#E2C94B',
@@ -29,6 +36,9 @@ class GraphRepresentation:
             return GraphRepresentation.NODE_COLOR['focused']
         return GraphRepresentation.NODE_COLOR['default']
 
+    def check_mode(mode_name):
+        return GraphRepresentation.MODE == GraphRepresentation.MODES[mode_name]
+
     def __init__(self, data=None):
         """Create a new graph representation.
 
@@ -40,6 +50,7 @@ class GraphRepresentation:
         self.tree = Tree()
         self.selected = False
         self.current_depth = 0
+        self.filetext = list()
 
     def send_data(self, data):
         self.data = data
@@ -53,10 +64,10 @@ class GraphRepresentation:
         """
         if len(el.family_connections):
             for fam_idn in el.family_connections:
-                self.subtree.draw_point(fam_idn)
+                self.tree.draw_point(fam_idn)
                 self.drawn_entries.add(fam_idn)
         c = GraphRepresentation.get_color(el.focus, el.select)
-        self.subtree.draw_node(el.idn, el.clean_display(), color=c)
+        self.tree.draw_node(el.idn, el.clean_display(), color=c)
         self.drawn_entries.add(el.idn)
 
     def sort_current_level(self):
@@ -110,9 +121,10 @@ class GraphRepresentation:
             else:
                 right_side.focus = current_focus
             self.focus_parents(right_side, current_focus + 1)
-            left_side = self.data.entries()[bloodline.partner]
-            left_side.focus = current_focus
-            self.focus_parents(left_side, current_focus)
+            if bloodline.partner:
+                left_side = self.data.entries()[bloodline.partner]
+                left_side.focus = current_focus
+                self.focus_parents(left_side, current_focus)
 
     def select_node(self, idn, deselect=False):
         """
@@ -172,13 +184,22 @@ class GraphRepresentation:
                                 if child not in self.drawn_entries]
                 family_not_drawn = entry.idn not in self.drawn_entries
                 if entry.head:
-                    self.draw_node(self.data.entries()[entry.head])
+                    entry_obj = self.data.entries()[entry.head]
+                    self.draw_node(entry_obj)
+                    self.filetext.append(
+                        f"""{self.current_depth}|{entry.head}| {entry_obj.name} {entry_obj.surname}\n""")
                 if entry.partner:
-                    self.draw_node(self.data.entries()[entry.partner])
+                    entry_obj = self.data.entries()[entry.partner]
+                    self.draw_node(entry_obj)
+                    self.filetext.append(
+                        f"""{self.current_depth}|{entry.partner}| {entry_obj.name} {entry_obj.surname}\n""")
                 if family_not_drawn and entry.idn in self.drawn_entries:
                     self.draw_edges(entry)
             elif isinstance(entry, Person):
+                entry_obj = self.data.entries()[id]
                 self.draw_node(self.data.entries()[id])
+                self.filetext.append(
+                    f"""{self.current_depth}|{id}| {entry_obj.name} {entry_obj.surname}\n""")
         return next_lv
 
     def return_next_level(self):
@@ -196,12 +217,17 @@ class GraphRepresentation:
             Create nodes. Manage subtrees (rows).
         """
         next_level = list()
-        self.subtree = Tree()
+        if GraphRepresentation.check_mode("PILLOW"):
+            self.subtree = self.tree
+        elif GraphRepresentation.check_mode("GRAPHVIZ"):
+            self.subtree = Tree()
         next_level = self.draw_level_return_next()
-        self.tree.add_subtree(self.subtree)
+        #self.tree.add_subtree(self.subtree)
         if len(next_level) != 0:
             self.current_depth -= 1
             self.current_level = next_level
+            if GraphRepresentation.check_mode("PILLOW"):
+                self.tree.draw_next_line()
             self.create_nodes()
 
     def draw_edges(self, family: Family):
@@ -279,4 +305,6 @@ class GraphRepresentation:
         self.set_current_tree_depth()
         self.selected = False
         self.create_nodes()
+        with open("log.txt", 'w') as logger:
+            logger.writelines(self.filetext)
         return self.tree.get_result(just_show)
